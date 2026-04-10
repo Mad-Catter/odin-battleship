@@ -1,0 +1,115 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: 'Zen Dots', sans-serif;
+}
+html {
+  height: 100%;
+}
+body {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 100%;
+  background-color: rgb(41, 41, 41);
+}
+
+/* Harbor section */
+.harbor {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 800px;
+}
+.harbor h1 {
+  color: white;
+  text-align: center;
+}
+.ship-container {
+  display: flex;
+  justify-content: end;
+  align-items: end;
+  margin: 5px 0;
+}
+.ship-container label,
+.ship-container button,
+.ship-container input {
+  margin-bottom: 5px;
+}
+label {
+  color: white;
+  margin: 0 3px;
+}
+input {
+  /* eslint-disable-next-line */
+  font-family: inherit;
+  width: 40px;
+  margin: 0 5px;
+}
+
+/* Ship img section */
+.ship-container button {
+  margin-left: 10px;
+}
+.ship-container img {
+  max-height: 75px;
+  margin-right: 10px;
+}
+.carrier {
+  width: 375px;
+}
+.battle {
+  width: 300px;
+}
+.destroyer,
+.submarine {
+  width: 225px;
+}
+.patrol {
+  width: 150px;
+}
+.go {
+  width: 150px;
+  height: 50px;
+  align-self: center;
+  margin: 50px;
+  font-size: 1.5rem;
+}
+
+/* Board section */
+.board-container {
+  display: grid;
+  grid-template-rows: repeat(11, 1fr);
+  grid-template-columns: repeat(11, 1fr);
+}
+.square-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+p {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+}
+.player-board {
+  grid-row: 2 / -1;
+  grid-column: 2 /-1;
+
+  background-image: url('./assets/ocean-background.png');
+  background-size: cover;
+  width: 750px;
+  height: 750px;
+  border-radius: 5px;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(10, 1fr);
+}
+.square {
+  border: 1px solid rgba(0, 0, 0, 0.233);
+  transition: all 0.2s;
+}
+.square:hover {
+  background-color: rgba(255, 255, 255, 0.212);
+  border: 1px solid rgb(0, 0, 0);
+}
