@@ -12,45 +12,45 @@
     <form action="">
       <div class="harbor">
         <h1>Select where the front of your ship should go:</h1>
-        <div class="ship-container">
+        <div class="ship-container carrier-container">
           <img src="./assets/carrier.svg" alt="carrier" class="carrier" />
           <label for="carrierX">X:</label>
           <input type="number" min="1" max="10" minlength="1" maxlength="2" id="carrierX" required />
           <label for="carrierY">Y:</label>
           <input type="text" pattern="^([a-j]|[A-J])$" minlength="1" maxlength="1" id="carrierY" required />
-          <button type="button" class="orient" id="carrier-orient">Vert</button>
+          <button type="button" class="orient" id="carrier-orient">Horz</button>
         </div>
-        <div class="ship-container">
+        <div class="ship-container battle-container">
           <img src="./assets/battle.svg" alt="Battleship" class="battle" />
           <label for="battleX">X:</label>
           <input type="number" min="1" max="10" minlength="1" maxlength="2" id="battleX" required />
           <label for="battleY">Y:</label>
           <input type="text" pattern="^([a-j]|[A-J])$" minlength="1" maxlength="1" id="battleY" required />
-          <button type="button" class="orient" id="battle-orient">Vert</button>
+          <button type="button" class="orient horz" id="battle-orient">Horz</button>
         </div>
-        <div class="ship-container">
-          <img src="./assets/destroy.svg" alt="destroyer" class="destroyer" />
+        <div class="ship-container destroy-container">
+          <img src="./assets/destroy.svg" alt="destroyer" class="destroy" />
           <label for="destroyX">X:</label>
           <input type="number" min="1" max="10" minlength="1" maxlength="2" id="destroyX" required />
           <label for="destroyY">Y:</label>
           <input type="text" pattern="^([a-j]|[A-J])$" minlength="1" maxlength="1" id="destroyY" required />
-          <button type="button" class="orient" id="destroy-orient">Vert</button>
+          <button type="button" class="orient horz" id="destroy-orient">Horz</button>
         </div>
-        <div class="ship-container">
-          <img src="./assets/sub.svg" alt="submarine" class="submarine" />
+        <div class="ship-container sub-container">
+          <img src="./assets/sub.svg" alt="submarine" class="sub" />
           <label for="subX">X:</label>
           <input type="number" min="1" max="10" minlength="1" maxlength="2" id="subX" required />
           <label for="subY">Y:</label>
           <input type="text" pattern="^([a-j]|[A-J])$" minlength="1" maxlength="1" id="subY" required />
-          <button type="button" class="orient" id="sub-orient">Vert</button>
+          <button type="button" class="orient horz" id="sub-orient">Horz</button>
         </div>
-        <div class="ship-container">
+        <div class="ship-container patrol-container">
           <img src="./assets/patrol.svg" alt="patrol boat" class="patrol" />
           <label for="patrolX">X:</label>
           <input type="number" min="1" max="10" minlength="1" maxlength="2" id="patrolX" required />
           <label for="patrolY">Y:</label>
           <input type="text" pattern="^([a-j]|[A-J])$" minlength="1" maxlength="1" id="patrolY" required />
-          <button type="button" class="orient" id="patrol-orient">Vert</button>
+          <button type="button" class="orient horz" id="patrol-orient">Horz</button>
         </div>
         <button type="button" class="go">Go</button>
       </div>
