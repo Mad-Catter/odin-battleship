@@ -66,6 +66,9 @@ input {
 .flipped {
   rotate: -90deg;
 }
+.placed {
+  filter: brightness(0);
+}
 .ship-container button {
   margin-left: 10px;
 }
@@ -93,9 +96,7 @@ input {
   max-height: 75px;
   margin-right: 10px;
 }
-.carrier {
-  width: 375px;
-}
+
 .battle {
   width: 300px;
 }
@@ -106,10 +107,23 @@ input {
 .patrol {
   width: 150px;
 } */
+.blank {
+  grid-column: 1;
+  grid-row: 1;
+}
 .board-container {
   display: grid;
-  grid-template-rows: repeat(11, 1fr);
-  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 75px);
+  grid-template-columns: repeat(11, 75px);
+}
+.player-board {
+  grid-row: 2 /-1;
+  grid-column: 2 / -1;
+}
+.board-carrier {
+  grid-column: 1;
+  grid-row: 4 / span 5;
+  width: 375px;
 }
 .square-label {
   display: flex;
