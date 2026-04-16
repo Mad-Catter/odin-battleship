@@ -5,12 +5,15 @@
 }
 html {
   height: 100%;
+  width: 100%;
 }
 body {
   display: flex;
   justify-content: space-around;
   align-items: center;
   min-height: 100%;
+  min-width: 100%;
+  overflow: hidden;
   background-color: rgb(41, 41, 41);
 }
 
@@ -91,22 +94,25 @@ input {
 }
 
 /* Board section */
-/*
-.ship-container img {
-  max-height: 75px;
-  margin-right: 10px;
+
+.board-carrier {
+  width: 375px;
+  max-height: 70px;
+}
+.board-battle {
+  width: 300px;
+  max-height: 70px;
+}
+.board-destroy,
+.board-sub {
+  width: 200px;
+  max-height: 65px;
+}
+.board-patrol {
+  width: 140px;
+  max-height: 70px;
 }
 
-.battle {
-  width: 300px;
-}
-.destroyer,
-.submarine {
-  width: 225px;
-}
-.patrol {
-  width: 150px;
-} */
 .blank {
   grid-column: 1;
   grid-row: 1;
@@ -120,11 +126,7 @@ input {
   grid-row: 2 /-1;
   grid-column: 2 / -1;
 }
-.board-carrier {
-  grid-column: 1;
-  grid-row: 4 / span 5;
-  width: 375px;
-}
+
 .square-label {
   display: flex;
   justify-content: center;
@@ -148,11 +150,34 @@ p {
   grid-template-rows: repeat(10, 1fr);
   grid-template-columns: repeat(10, 1fr);
 }
+
+.placement-board {
+  position: relative;
+}
+.big-ship {
+  position: absolute;
+  top: -50000px;
+}
+.currently-dragging {
+  pointer-events: none;
+}
+
 .square {
   border: 1px solid rgba(0, 0, 0, 0.233);
   transition: all 0.2s;
 }
-.square:hover {
+.square:hover,
+.is-hovered {
   background-color: rgba(255, 255, 255, 0.212);
   border: 1px solid rgb(0, 0, 0);
+}
+.is-invalid {
+  background-color: rgba(196, 9, 9, 0.212);
+  border: 1px solid rgb(0, 0, 0);
+}
+.is-invalid:hover {
+  background-color: rgba(196, 44, 44, 0.212);
+}
+.placed-square {
+  background-color: green;
 }
