@@ -87,6 +87,7 @@ shipContainers.forEach((cont) => {
   });
 });
 const hoveredSquares = [];
+const placedSquares = [];
 const boardSquares = document.querySelectorAll('.square');
 let validPlacement = false;
 for (const square of boardSquares) {
@@ -114,12 +115,28 @@ for (const square of boardSquares) {
         }
       } else {
         // logic for placed sections here
+        const currentSquares = [];
         for (let i = 0; i < currentShip.length; i++) {
           const search = `.x${squareX + i}.y${squareY}`;
           const hoveredSquare = document.querySelector(search);
-          hoveredSquare.classList.add('is-hovered');
-          hoveredSquares.push(hoveredSquare);
-          validPlacement = true;
+          currentSquares.push(hoveredSquare);
+        }
+        if (
+          !placedSquares.some((arr) => {
+            if (currentSquares.includes(arr[0])) return true;
+          })
+        ) {
+          for (const hoveredSquare of currentSquares) {
+            hoveredSquare.classList.add('is-hovered');
+            hoveredSquares.push(hoveredSquare);
+            validPlacement = true;
+          }
+        } else {
+          for (const invalidSquare of currentSquares) {
+            invalidSquare.classList.add('is-invalid');
+            hoveredSquares.push(invalidSquare);
+            validPlacement = false;
+          }
         }
       }
     }
@@ -134,12 +151,28 @@ for (const square of boardSquares) {
         }
       } else {
         // logic for placed sections here
+        const currentSquares = [];
         for (let i = 0; i < currentShip.length; i++) {
           const search = `.x${squareX}.y${squareY - i}`;
           const hoveredSquare = document.querySelector(search);
-          hoveredSquare.classList.add('is-hovered');
-          hoveredSquares.push(hoveredSquare);
-          validPlacement = true;
+          currentSquares.push(hoveredSquare);
+        }
+        if (
+          !placedSquares.some((arr) => {
+            if (currentSquares.includes(arr[0])) return true;
+          })
+        ) {
+          for (const hoveredSquare of currentSquares) {
+            hoveredSquare.classList.add('is-hovered');
+            hoveredSquares.push(hoveredSquare);
+            validPlacement = true;
+          }
+        } else {
+          for (const invalidSquare of currentSquares) {
+            invalidSquare.classList.add('is-invalid');
+            hoveredSquares.push(invalidSquare);
+            validPlacement = false;
+          }
         }
       }
     }
@@ -189,12 +222,14 @@ for (const square of boardSquares) {
         for (let i = 0; i < currentShip.length; i++) {
           const search = `.x${squareX + i}.y${squareY}`;
           const validSquare = document.querySelector(search);
+          placedSquares.push([validSquare, currentShip.shipName]);
           validSquare.classList.add('placed-square');
         }
       } else {
         for (let i = 0; i < currentShip.length; i++) {
           const search = `.x${squareX}.y${squareY - i}`;
           const validSquare = document.querySelector(search);
+          placedSquares.push([validSquare, currentShip.shipName]);
           validSquare.classList.add('placed-square');
         }
       }
