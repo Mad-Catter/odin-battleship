@@ -5,56 +5,17 @@
 // Once go is clicked an error should pop up if there are invalid places/unplaced items.  Once all is finished go to next screen.
 // Also drag and drop ships should be a thing, however that means changing the harbor up to have enough space for each ship.
 // Maybe can change vert horz to flipping 90degs each time for more customization of boards.
-
-// const orientBtns = document.querySelectorAll('.orient');
-
-// orientBtns.forEach((btn) => {
-//   const shipClass = '.' + btn.id.replace('-orient', '');
-//   const ship = document.querySelector(shipClass);
-//   btn.addEventListener('click', (e) => {
-//     btn.classList.toggle('horz');
-//     btn.classList.toggle('vert');
-//     if (btn.classList.contains('horz')) {
-//       btn.textContent = 'Horz';
-//     } else {
-//       btn.textContent = 'Vert';
-//     }
-//     ship.classList.toggle('flipped');
-//   });
-// });
-
-// const labels = document.querySelectorAll('.square-label');
-// for (let i = 0; i < 20; i++) {
-//   const label = labels[i];
-//   if (i < 10) {
-//     label.style.setProperty('grid-column', `${i + 2}`);
-//     label.style.setProperty('grid-row', `1`);
-//   } else {
-//     label.style.setProperty('grid-column', '1');
-//     label.style.setProperty('grid-row', `${i + 2 - 10}`);
-//   }
-// }
-
 let currentShip = null;
-// const body = document.querySelector('body');
-// body.addEventListener('wheel', (e) => {
-//   console.log('yeee');
-//   if (currentShip !== null) {
-//     if (currentShip.orient === 'horz') {
-//       currentShip.orient = 'vert';
-//     } else {
-//       currentShip.orient = 'horz';
-//     }
-//   }
-// });
-
+let currentlyDragging = false;
+const placedSquares = [];
 const shipContainers = document.querySelectorAll('.ship-container');
 
 shipContainers.forEach((cont) => {
-  const ship = cont.querySelector('img');
+  const ship = cont.querySelector('.main-ship');
+  const miniShip = cont.querySelector('.mini-ship');
+  const search = '.board-' + ship.classList[0];
+  const bigShip = document.querySelector(search);
   const btn = cont.querySelector('button');
-  // const xInput = cont.querySelector('x-input');
-  // const yInput = cont.querySelector('y-input');
   btn.addEventListener('click', (e) => {
     btn.classList.toggle('horz');
     btn.classList.toggle('vert');
@@ -64,12 +25,12 @@ shipContainers.forEach((cont) => {
       btn.textContent = 'Vert';
     }
     ship.classList.toggle('flipped');
-    const search = '.board-' + ship.classList[0];
-    const bigShip = document.querySelector(search);
     bigShip.classList.toggle('flipped');
+    miniShip.classList.toggle('flipped');
   });
-  ship.addEventListener('dragstart', (e) => {
-    const search = '.board-' + ship.classList[0];
+
+  function moveShip(e) {
+    e.preventDefault();
     currentShip = {
       orient: btn.classList.contains('horz') ? 'horz' : 'vert',
       shipName: ship.classList[0],
@@ -82,164 +43,186 @@ shipContainers.forEach((cont) => {
               ? 3
               : 2,
       bigShip: document.querySelector(search),
+      miniShip: miniShip,
+      flip() {
+        btn.click();
+        this.orient = this.orient === 'horz' ? 'vert' : 'horz';
+        if (hoveredSquares[0]) {
+          const square = hoveredSquares[0];
+          square.dispatchEvent(new Event('mouseleave'));
+          square.dispatchEvent(new Event('mouseover'));
+        }
+      },
+      disableFlip() {
+        ship.classList.add('placed');
+        btn.setAttribute('disabled', '');
+      },
+      enableFlip() {
+        ship.classList.remove('placed');
+        btn.removeAttribute('disabled');
+      },
     };
+    currentShip.enableFlip();
     currentShip.bigShip.classList.add('currently-dragging');
-  });
+    // to remove the big ship from the board if replaceing using the smaller ship from the harbor
+    currentShip.bigShip.style.top = '-5000px';
+
+    for (let i = placedSquares.length; i > 0; i--) {
+      const square = placedSquares[i - 1];
+      if (square[1] === currentShip.shipName) {
+        square[0].classList.remove('placed-square');
+        placedSquares.splice(i - 1, 1);
+      }
+    }
+    currentlyDragging = true;
+  }
+  ship.addEventListener('dragstart', moveShip);
+  bigShip.addEventListener('dragstart', moveShip);
 });
+
+const placementBoard = document.querySelector('.placement-board');
+placementBoard.addEventListener('mouseout', () => {
+  if (currentShip) currentShip.bigShip.style.top = '-5000px';
+});
+document.addEventListener('wheel', () => {
+  if (currentShip) currentShip.flip();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!placementBoard.matches(':hover') && currentShip) {
+    currentShip.miniShip.style.top = e.pageY + 10 + 'px';
+    currentShip.miniShip.style.left = e.pageX - 40 + 'px';
+  } else if (placementBoard.matches(':hover') && currentShip) {
+    currentShip.miniShip.style.top = 50000 + 'px';
+  }
+});
+
 const hoveredSquares = [];
-const placedSquares = [];
 const boardSquares = document.querySelectorAll('.square');
 let validPlacement = false;
 for (const square of boardSquares) {
+  // Each square's class list is in the format: square x# y#
   const squareX = Number(square.classList[1].charAt(1));
   const squareY = Number(square.classList[2].charAt(1));
-  square.addEventListener('dragleave', () => {
-    for (let i = hoveredSquares.length; i > 0; i--) {
-      const square = hoveredSquares.pop();
-      square.classList.remove('is-invalid');
-      square.classList.remove('is-hovered');
-    }
-    currentShip.bigShip.style.top = '-5000px';
-  });
-  square.addEventListener('dragover', (e) => {
+  square.addEventListener('mouseleave', (e) => {
     e.preventDefault();
-    // Each square's class list is in the format: square x# y#
-    if (currentShip.orient === 'horz') {
-      if (squareX + currentShip.length > 10) {
-        for (let i = squareX; i < 10; i++) {
-          const search = `.x${i}.y${squareY}`;
-          const invalidSquare = document.querySelector(search);
-          invalidSquare.classList.add('is-invalid');
-          hoveredSquares.push(invalidSquare);
+    if (currentlyDragging) {
+      for (let i = hoveredSquares.length; i > 0; i--) {
+        const square = hoveredSquares.pop();
+        square.classList.remove('is-invalid');
+        square.classList.remove('is-hovered');
+      }
+    }
+  });
+  square.addEventListener('mouseover', (e) => {
+    if (currentlyDragging) {
+      const currentSquares = [];
+      let invalid = false;
+      for (let i = 0; i < currentShip.length; i++) {
+        let search;
+        // This is less efficent time wise than having the if statement outside the loop but it is easier to read and more space efficent.
+        // So on this small project I am doing it the short way.
+        if (currentShip.orient === 'horz') {
+          search = `.x${squareX + i}.y${squareY}`;
+        } else {
+          search = `.x${squareX}.y${squareY - i}`;
+        }
+        const hoveredSquare = document.querySelector(search);
+        if (hoveredSquare === null) {
+          invalid = true;
+          break;
+        }
+        currentSquares.push(hoveredSquare);
+      }
+      if (!invalid) {
+        if (placedSquares.some((arr) => currentSquares.includes(arr[0]))) invalid = true;
+      }
+      if (invalid) {
+        for (const square of currentSquares) {
+          square.classList.add('is-invalid');
+          hoveredSquares.push(square);
           validPlacement = false;
         }
       } else {
-        // logic for placed sections here
-        const currentSquares = [];
-        for (let i = 0; i < currentShip.length; i++) {
-          const search = `.x${squareX + i}.y${squareY}`;
-          const hoveredSquare = document.querySelector(search);
-          currentSquares.push(hoveredSquare);
-        }
-        if (
-          !placedSquares.some((arr) => {
-            if (currentSquares.includes(arr[0])) return true;
-          })
-        ) {
-          for (const hoveredSquare of currentSquares) {
-            hoveredSquare.classList.add('is-hovered');
-            hoveredSquares.push(hoveredSquare);
-            validPlacement = true;
-          }
-        } else {
-          for (const invalidSquare of currentSquares) {
-            invalidSquare.classList.add('is-invalid');
-            hoveredSquares.push(invalidSquare);
-            validPlacement = false;
-          }
+        for (const square of currentSquares) {
+          square.classList.add('is-hovered');
+          hoveredSquares.push(square);
+          validPlacement = true;
         }
       }
-    }
-    if (currentShip.orient === 'vert') {
-      if (squareY - currentShip.length < -1) {
-        for (let i = squareY; i > -1; i--) {
-          const search = `.x${squareX}.y${i}`;
-          const invalidSquare = document.querySelector(search);
-          invalidSquare.classList.add('is-invalid');
-          hoveredSquares.push(invalidSquare);
-          validPlacement = false;
-        }
-      } else {
-        // logic for placed sections here
-        const currentSquares = [];
-        for (let i = 0; i < currentShip.length; i++) {
-          const search = `.x${squareX}.y${squareY - i}`;
-          const hoveredSquare = document.querySelector(search);
-          currentSquares.push(hoveredSquare);
-        }
-        if (
-          !placedSquares.some((arr) => {
-            if (currentSquares.includes(arr[0])) return true;
-          })
-        ) {
-          for (const hoveredSquare of currentSquares) {
-            hoveredSquare.classList.add('is-hovered');
-            hoveredSquares.push(hoveredSquare);
-            validPlacement = true;
-          }
-        } else {
-          for (const invalidSquare of currentSquares) {
-            invalidSquare.classList.add('is-invalid');
-            hoveredSquares.push(invalidSquare);
-            validPlacement = false;
-          }
-        }
-      }
-    }
-    if (currentShip.orient === 'horz') {
-      currentShip.bigShip.style.top =
-        square.offsetTop + (currentShip.shipName === 'carrier' || currentShip.shipName === 'battle' ? 0 : 15) + 'px';
-      currentShip.bigShip.style.left =
-        square.offsetLeft +
-        (currentShip.shipName === 'carrier' || currentShip.shipName === 'battle'
-          ? -2.5
-          : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
-            ? 15
-            : 5) +
-        'px';
-    } else {
-      currentShip.bigShip.style.top =
-        square.offsetTop +
-        (currentShip.shipName === 'carrier'
-          ? 150
-          : currentShip.shipName === 'battle'
-            ? 115
-            : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
-              ? 90
-              : 45) +
-        'px';
-      currentShip.bigShip.style.left =
-        square.offsetLeft +
-        (currentShip.shipName === 'carrier'
-          ? -150
-          : currentShip.shipName === 'battle'
-            ? -115
-            : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
-              ? -65
-              : -30) +
-        'px';
-    }
-    // Need to record placement and which ships are being placed.
-    // Need current ship to be remembered when moving big ships and for the program to recognize things are being moved.
-    // Ships currently flip when the button horz/vert button is pressed even while placed.
-    // Spinning wheel while dragging currently does not work with drop evetns.  New events may be needed instead.
-    // X and Y buttons do not work.  Needs to either be removed or worked on
-  });
-  square.addEventListener('drop', (e) => {
-    e.preventDefault();
-    if (validPlacement) {
       if (currentShip.orient === 'horz') {
-        for (let i = 0; i < currentShip.length; i++) {
-          const search = `.x${squareX + i}.y${squareY}`;
-          const validSquare = document.querySelector(search);
-          placedSquares.push([validSquare, currentShip.shipName]);
-          validSquare.classList.add('placed-square');
-        }
+        currentShip.bigShip.style.top =
+          square.offsetTop + (currentShip.shipName === 'carrier' || currentShip.shipName === 'battle' ? 0 : 15) + 'px';
+        currentShip.bigShip.style.left =
+          square.offsetLeft +
+          (currentShip.shipName === 'carrier' || currentShip.shipName === 'battle'
+            ? -2.5
+            : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
+              ? 15
+              : 5) +
+          'px';
       } else {
-        for (let i = 0; i < currentShip.length; i++) {
-          const search = `.x${squareX}.y${squareY - i}`;
-          const validSquare = document.querySelector(search);
-          placedSquares.push([validSquare, currentShip.shipName]);
-          validSquare.classList.add('placed-square');
-        }
+        currentShip.bigShip.style.top =
+          square.offsetTop +
+          (currentShip.shipName === 'carrier'
+            ? 150
+            : currentShip.shipName === 'battle'
+              ? 115
+              : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
+                ? 90
+                : 45) +
+          'px';
+        currentShip.bigShip.style.left =
+          square.offsetLeft +
+          (currentShip.shipName === 'carrier'
+            ? -150
+            : currentShip.shipName === 'battle'
+              ? -115
+              : currentShip.shipName === 'destroy' || currentShip.shipName === 'sub'
+                ? -65
+                : -30) +
+          'px';
       }
-    } else {
-      currentShip.bigShip.style.top = '-5000px';
     }
-    currentShip.bigShip.classList.remove('currently-dragging');
-    currentShip = null;
+    // Ships currently flip when the button horz/vert button is pressed even while placed.
+  });
+  square.addEventListener('mouseup', (e) => {
+    if (currentlyDragging) {
+      if (validPlacement) {
+        if (currentShip.orient === 'horz') {
+          for (let i = 0; i < currentShip.length; i++) {
+            const search = `.x${squareX + i}.y${squareY}`;
+            const validSquare = document.querySelector(search);
+            placedSquares.push([validSquare, currentShip.shipName]);
+            validSquare.classList.add('placed-square');
+          }
+        } else {
+          for (let i = 0; i < currentShip.length; i++) {
+            const search = `.x${squareX}.y${squareY - i}`;
+            const validSquare = document.querySelector(search);
+            placedSquares.push([validSquare, currentShip.shipName]);
+            validSquare.classList.add('placed-square');
+          }
+        }
+        currentShip.disableFlip();
+      } else {
+        currentShip.bigShip.style.top = '-5000px';
+      }
+      for (let i = hoveredSquares.length; i > 0; i--) {
+        const square = hoveredSquares.pop();
+        square.classList.remove('is-invalid');
+        square.classList.remove('is-hovered');
+      }
+    }
   });
 }
+document.addEventListener('mouseup', () => {
+  if (currentShip !== null) {
+    currentShip.miniShip.style.top = 50000 + 'px';
+    currentShip.bigShip.classList.remove('currently-dragging');
+    currentShip = null;
+    currentlyDragging = false;
+  }
+});
 
 //   Then whenever you are hovering over the board, highlight the length of the ship on the board (or height).  Possibly by giving a highlighted class
 // Or forcing a hovering.

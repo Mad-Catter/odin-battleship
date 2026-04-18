@@ -93,6 +93,13 @@ input {
   width: 75px;
 }
 
+.mini-ship {
+  width: 70px;
+  opacity: 50%;
+  position: absolute;
+  top: 5000px;
+}
+
 /* Board section */
 
 .board-carrier {
@@ -131,6 +138,7 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: default;
 }
 p {
   font-size: 2rem;
@@ -171,13 +179,13 @@ p {
   background-color: rgba(255, 255, 255, 0.212);
   border: 1px solid rgb(0, 0, 0);
 }
+.placed-square {
+  background-color: green;
+}
 .is-invalid {
   background-color: rgba(196, 9, 9, 0.212);
   border: 1px solid rgb(0, 0, 0);
 }
 .is-invalid:hover {
   background-color: rgba(196, 44, 44, 0.212);
-}
-.placed-square {
-  background-color: green;
 }
