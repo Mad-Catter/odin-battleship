@@ -9,222 +9,223 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <form action="">
-      <div class="harbor">
-        <h1>Select where the front of your ship should go:</h1>
-        <div class="ship-container carrier-container">
-          <img src="./assets/carrier.svg" alt="carrier" class="carrier main-ship" draggable="true" />
-          <img src="./assets/carrier.svg" alt="carrier" class="mini-carrier mini-ship" draggable="true" />
-          <button type="button" class="orient horz" id="carrier-orient">Horz</button>
-        </div>
-        <div class="ship-container battle-container">
-          <img src="./assets/battle.svg" alt="Battleship" class="battle main-ship" draggable="true" />
-          <img src="./assets/battle.svg" alt="Battleship" class="mini-battle mini-ship" draggable="true" />
-          <button type="button" class="orient horz" id="battle-orient">Horz</button>
-        </div>
-        <div class="ship-container destroy-container">
-          <img src="./assets/destroy.svg" alt="destroyer" class="destroy main-ship" draggable="true" />
-          <img src="./assets/destroy.svg" alt="destroyer" class="mini-destroy mini-ship" draggable="true" />
+    <div class="starting-screen">
+      <h1>BATTLESHIP</h1>
 
-          <button type="button" class="orient horz" id="destroy-orient">Horz</button>
+      <div class="player-count">
+        <h2>How many players?</h2>
+        <div class="player-count-buttons">
+          <button type="button" class="one-player-button">One</button>
+          <button type="button" class="two-player-button">Two</button>
         </div>
-        <div class="ship-container sub-container">
-          <img src="./assets/sub.svg" alt="submarine" class="sub main-ship" draggable="true" />
-
-          <img src="./assets/sub.svg" alt="submarine" class="mini-sub mini-ship" draggable="true" />
-          <button type="button" class="orient horz" id="sub-orient">Horz</button>
-        </div>
-        <div class="ship-container patrol-container">
-          <img src="./assets/patrol.svg" alt="patrol boat" class="patrol main-ship" draggable="true" />
-          <img src="./assets/patrol.svg" alt="patrol boat" class="mini-patrol mini-ship" draggable="true" />
-
-          <button type="button" class="orient horz" id="patrol-orient">Horz</button>
-        </div>
-        <button type="button" class="go">Go</button>
-      </div>
-    </form>
-    <div class="board-container">
-      <div class="blank"></div>
-      <div class="square-label">
-        <p>A</p>
-      </div>
-      <div class="square-label">
-        <p>B</p>
-      </div>
-      <div class="square-label">
-        <p>C</p>
-      </div>
-      <div class="square-label">
-        <p>D</p>
-      </div>
-      <div class="square-label">
-        <p>E</p>
-      </div>
-      <div class="square-label">
-        <p>F</p>
-      </div>
-      <div class="square-label">
-        <p>G</p>
-      </div>
-      <div class="square-label">
-        <p>H</p>
-      </div>
-
-      <div class="square-label">
-        <p>I</p>
-      </div>
-      <div class="square-label">
-        <p>J</p>
-      </div>
-      <div class="square-label">
-        <p>10</p>
-      </div>
-      <div class="square-label">
-        <p>9</p>
-      </div>
-      <div class="square-label">
-        <p>8</p>
-      </div>
-      <div class="square-label">
-        <p>7</p>
-      </div>
-      <div class="square-label">
-        <p>6</p>
-      </div>
-      <div class="square-label">
-        <p>5</p>
-      </div>
-      <div class="square-label">
-        <p>4</p>
-      </div>
-      <div class="square-label">
-        <p>3</p>
-      </div>
-      <div class="square-label">
-        <p>2</p>
-      </div>
-      <div class="square-label">
-        <p>1</p>
-      </div>
-
-      <div class="player-board ally placement-board">
-        <img src="./assets/carrier.svg" alt="carrier" class="board-carrier big-ship" draggable="true" />
-        <img src="./assets/destroy.svg" alt="destroy" class="board-destroy big-ship" draggable="true" />
-        <img src="./assets/battle.svg" alt="battle" class="board-battle big-ship" draggable="true" />
-        <img src="./assets/sub.svg" alt="sub" class="board-sub big-ship" draggable="true" />
-        <img src="./assets/patrol.svg" alt="patrol" class="board-patrol big-ship" draggable="true" />
-        <div class="square x0 y9"></div>
-        <div class="square x1 y9"></div>
-        <div class="square x2 y9"></div>
-        <div class="square x3 y9"></div>
-        <div class="square x4 y9"></div>
-        <div class="square x5 y9"></div>
-        <div class="square x6 y9"></div>
-        <div class="square x7 y9"></div>
-        <div class="square x8 y9"></div>
-        <div class="square x9 y9"></div>
-        <div class="square x0 y8"></div>
-        <div class="square x1 y8"></div>
-        <div class="square x2 y8"></div>
-        <div class="square x3 y8"></div>
-        <div class="square x4 y8"></div>
-        <div class="square x5 y8"></div>
-        <div class="square x6 y8"></div>
-        <div class="square x7 y8"></div>
-        <div class="square x8 y8"></div>
-        <div class="square x9 y8"></div>
-        <div class="square x0 y7"></div>
-        <div class="square x1 y7"></div>
-        <div class="square x2 y7"></div>
-        <div class="square x3 y7"></div>
-        <div class="square x4 y7"></div>
-        <div class="square x5 y7"></div>
-        <div class="square x6 y7"></div>
-        <div class="square x7 y7"></div>
-        <div class="square x8 y7"></div>
-        <div class="square x9 y7"></div>
-        <div class="square x0 y6"></div>
-        <div class="square x1 y6"></div>
-        <div class="square x2 y6"></div>
-        <div class="square x3 y6"></div>
-        <div class="square x4 y6"></div>
-        <div class="square x5 y6"></div>
-        <div class="square x6 y6"></div>
-        <div class="square x7 y6"></div>
-        <div class="square x8 y6"></div>
-        <div class="square x9 y6"></div>
-        <div class="square x0 y5"></div>
-        <div class="square x1 y5"></div>
-        <div class="square x2 y5"></div>
-        <div class="square x3 y5"></div>
-        <div class="square x4 y5"></div>
-        <div class="square x5 y5"></div>
-        <div class="square x6 y5"></div>
-        <div class="square x7 y5"></div>
-        <div class="square x8 y5"></div>
-        <div class="square x9 y5"></div>
-        <div class="square x0 y4"></div>
-        <div class="square x1 y4"></div>
-        <div class="square x2 y4"></div>
-        <div class="square x3 y4"></div>
-        <div class="square x4 y4"></div>
-        <div class="square x5 y4"></div>
-        <div class="square x6 y4"></div>
-        <div class="square x7 y4"></div>
-        <div class="square x8 y4"></div>
-        <div class="square x9 y4"></div>
-        <div class="square x0 y3"></div>
-        <div class="square x1 y3"></div>
-        <div class="square x2 y3"></div>
-        <div class="square x3 y3"></div>
-        <div class="square x4 y3"></div>
-        <div class="square x5 y3"></div>
-        <div class="square x6 y3"></div>
-        <div class="square x7 y3"></div>
-        <div class="square x8 y3"></div>
-        <div class="square x9 y3"></div>
-        <div class="square x0 y2"></div>
-        <div class="square x1 y2"></div>
-        <div class="square x2 y2"></div>
-        <div class="square x3 y2"></div>
-        <div class="square x4 y2"></div>
-        <div class="square x5 y2"></div>
-        <div class="square x6 y2"></div>
-        <div class="square x7 y2"></div>
-        <div class="square x8 y2"></div>
-        <div class="square x9 y2"></div>
-        <div class="square x0 y1"></div>
-        <div class="square x1 y1"></div>
-        <div class="square x2 y1"></div>
-        <div class="square x3 y1"></div>
-        <div class="square x4 y1"></div>
-        <div class="square x5 y1"></div>
-        <div class="square x6 y1"></div>
-        <div class="square x7 y1"></div>
-        <div class="square x8 y1"></div>
-        <div class="square x9 y1"></div>
-        <div class="square x0 y0"></div>
-        <div class="square x1 y0"></div>
-        <div class="square x2 y0"></div>
-        <div class="square x3 y0"></div>
-        <div class="square x4 y0"></div>
-        <div class="square x5 y0"></div>
-        <div class="square x6 y0"></div>
-        <div class="square x7 y0"></div>
-        <div class="square x8 y0"></div>
-        <div class="square x9 y0"></div>
       </div>
     </div>
-    <!-- <p>This is a before test</p>
-    <img src="./assets/patrol.svg" alt="" />
-    <img src="./assets/sub.svg" alt="" />
-    <img src="./assets/carrier.svg" alt="" />
-    <img src="./assets/destroy.svg" alt="" />
-    <img src="./assets/battle.svg" alt="" />
-    <img src="./assets/grey-cone.svg" alt="" />
-    <img src="./assets/red-cone.svg" alt="" />
-    <img src="./assets/grey-ball.svg" alt="" />
-    <img src="./assets/red-ball.svg" alt="" />
-    <p>This is an after test</p> -->
+    <div class="transition-screen">
+      <h2 class="transition-first-text">Player Two look away</h2>
+      <h2 class="transition-second-text">Player One prepare to place your boats</h2>
+    </div>
+    <div class="placement-screen">
+      <form action="">
+        <div class="harbor">
+          <h1>Drag your ships out to sea:</h1>
+          <div class="ship-container carrier-container">
+            <img src="./assets/carrier.svg" alt="carrier" class="carrier main-ship" draggable="true" />
+            <img src="./assets/carrier.svg" alt="carrier" class="mini-carrier mini-ship" draggable="true" />
+            <button type="button" class="orient horz" id="carrier-orient">Horz</button>
+          </div>
+          <div class="ship-container battle-container">
+            <img src="./assets/battle.svg" alt="Battleship" class="battle main-ship" draggable="true" />
+            <img src="./assets/battle.svg" alt="Battleship" class="mini-battle mini-ship" draggable="true" />
+            <button type="button" class="orient horz" id="battle-orient">Horz</button>
+          </div>
+          <div class="ship-container destroy-container">
+            <img src="./assets/destroy.svg" alt="destroyer" class="destroy main-ship" draggable="true" />
+            <img src="./assets/destroy.svg" alt="destroyer" class="mini-destroy mini-ship" draggable="true" />
+            <button type="button" class="orient horz" id="destroy-orient">Horz</button>
+          </div>
+          <div class="ship-container sub-container">
+            <img src="./assets/sub.svg" alt="submarine" class="sub main-ship" draggable="true" />
+            <img src="./assets/sub.svg" alt="submarine" class="mini-sub mini-ship" draggable="true" />
+            <button type="button" class="orient horz" id="sub-orient">Horz</button>
+          </div>
+          <div class="ship-container patrol-container">
+            <img src="./assets/patrol.svg" alt="patrol boat" class="patrol main-ship" draggable="true" />
+            <img src="./assets/patrol.svg" alt="patrol boat" class="mini-patrol mini-ship" draggable="true" />
+            <button type="button" class="orient horz" id="patrol-orient">Horz</button>
+          </div>
+          <button type="button" class="go" disabled>Go</button>
+        </div>
+      </form>
+      <div class="board-container">
+        <div class="blank"></div>
+        <div class="square-label">
+          <p>A</p>
+        </div>
+        <div class="square-label">
+          <p>B</p>
+        </div>
+        <div class="square-label">
+          <p>C</p>
+        </div>
+        <div class="square-label">
+          <p>D</p>
+        </div>
+        <div class="square-label">
+          <p>E</p>
+        </div>
+        <div class="square-label">
+          <p>F</p>
+        </div>
+        <div class="square-label">
+          <p>G</p>
+        </div>
+        <div class="square-label">
+          <p>H</p>
+        </div>
+        <div class="square-label">
+          <p>I</p>
+        </div>
+        <div class="square-label">
+          <p>J</p>
+        </div>
+        <div class="square-label">
+          <p>10</p>
+        </div>
+        <div class="square-label">
+          <p>9</p>
+        </div>
+        <div class="square-label">
+          <p>8</p>
+        </div>
+        <div class="square-label">
+          <p>7</p>
+        </div>
+        <div class="square-label">
+          <p>6</p>
+        </div>
+        <div class="square-label">
+          <p>5</p>
+        </div>
+        <div class="square-label">
+          <p>4</p>
+        </div>
+        <div class="square-label">
+          <p>3</p>
+        </div>
+        <div class="square-label">
+          <p>2</p>
+        </div>
+        <div class="square-label">
+          <p>1</p>
+        </div>
+        <div class="player-board ally placement-board">
+          <img src="./assets/carrier.svg" alt="carrier" class="board-carrier big-ship" draggable="true" />
+          <img src="./assets/destroy.svg" alt="destroy" class="board-destroy big-ship" draggable="true" />
+          <img src="./assets/battle.svg" alt="battle" class="board-battle big-ship" draggable="true" />
+          <img src="./assets/sub.svg" alt="sub" class="board-sub big-ship" draggable="true" />
+          <img src="./assets/patrol.svg" alt="patrol" class="board-patrol big-ship" draggable="true" />
+          <div class="square x0 y9"></div>
+          <div class="square x1 y9"></div>
+          <div class="square x2 y9"></div>
+          <div class="square x3 y9"></div>
+          <div class="square x4 y9"></div>
+          <div class="square x5 y9"></div>
+          <div class="square x6 y9"></div>
+          <div class="square x7 y9"></div>
+          <div class="square x8 y9"></div>
+          <div class="square x9 y9"></div>
+          <div class="square x0 y8"></div>
+          <div class="square x1 y8"></div>
+          <div class="square x2 y8"></div>
+          <div class="square x3 y8"></div>
+          <div class="square x4 y8"></div>
+          <div class="square x5 y8"></div>
+          <div class="square x6 y8"></div>
+          <div class="square x7 y8"></div>
+          <div class="square x8 y8"></div>
+          <div class="square x9 y8"></div>
+          <div class="square x0 y7"></div>
+          <div class="square x1 y7"></div>
+          <div class="square x2 y7"></div>
+          <div class="square x3 y7"></div>
+          <div class="square x4 y7"></div>
+          <div class="square x5 y7"></div>
+          <div class="square x6 y7"></div>
+          <div class="square x7 y7"></div>
+          <div class="square x8 y7"></div>
+          <div class="square x9 y7"></div>
+          <div class="square x0 y6"></div>
+          <div class="square x1 y6"></div>
+          <div class="square x2 y6"></div>
+          <div class="square x3 y6"></div>
+          <div class="square x4 y6"></div>
+          <div class="square x5 y6"></div>
+          <div class="square x6 y6"></div>
+          <div class="square x7 y6"></div>
+          <div class="square x8 y6"></div>
+          <div class="square x9 y6"></div>
+          <div class="square x0 y5"></div>
+          <div class="square x1 y5"></div>
+          <div class="square x2 y5"></div>
+          <div class="square x3 y5"></div>
+          <div class="square x4 y5"></div>
+          <div class="square x5 y5"></div>
+          <div class="square x6 y5"></div>
+          <div class="square x7 y5"></div>
+          <div class="square x8 y5"></div>
+          <div class="square x9 y5"></div>
+          <div class="square x0 y4"></div>
+          <div class="square x1 y4"></div>
+          <div class="square x2 y4"></div>
+          <div class="square x3 y4"></div>
+          <div class="square x4 y4"></div>
+          <div class="square x5 y4"></div>
+          <div class="square x6 y4"></div>
+          <div class="square x7 y4"></div>
+          <div class="square x8 y4"></div>
+          <div class="square x9 y4"></div>
+          <div class="square x0 y3"></div>
+          <div class="square x1 y3"></div>
+          <div class="square x2 y3"></div>
+          <div class="square x3 y3"></div>
+          <div class="square x4 y3"></div>
+          <div class="square x5 y3"></div>
+          <div class="square x6 y3"></div>
+          <div class="square x7 y3"></div>
+          <div class="square x8 y3"></div>
+          <div class="square x9 y3"></div>
+          <div class="square x0 y2"></div>
+          <div class="square x1 y2"></div>
+          <div class="square x2 y2"></div>
+          <div class="square x3 y2"></div>
+          <div class="square x4 y2"></div>
+          <div class="square x5 y2"></div>
+          <div class="square x6 y2"></div>
+          <div class="square x7 y2"></div>
+          <div class="square x8 y2"></div>
+          <div class="square x9 y2"></div>
+          <div class="square x0 y1"></div>
+          <div class="square x1 y1"></div>
+          <div class="square x2 y1"></div>
+          <div class="square x3 y1"></div>
+          <div class="square x4 y1"></div>
+          <div class="square x5 y1"></div>
+          <div class="square x6 y1"></div>
+          <div class="square x7 y1"></div>
+          <div class="square x8 y1"></div>
+          <div class="square x9 y1"></div>
+          <div class="square x0 y0"></div>
+          <div class="square x1 y0"></div>
+          <div class="square x2 y0"></div>
+          <div class="square x3 y0"></div>
+          <div class="square x4 y0"></div>
+          <div class="square x5 y0"></div>
+          <div class="square x6 y0"></div>
+          <div class="square x7 y0"></div>
+          <div class="square x8 y0"></div>
+          <div class="square x9 y0"></div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

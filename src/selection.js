@@ -8,6 +8,8 @@
 let currentShip = null;
 let currentlyDragging = false;
 const placedSquares = [];
+const shipPlacements = [];
+const go = document.querySelector('.go');
 const shipContainers = document.querySelectorAll('.ship-container');
 
 shipContainers.forEach((cont) => {
@@ -74,6 +76,13 @@ shipContainers.forEach((cont) => {
         placedSquares.splice(i - 1, 1);
       }
     }
+    for (let i = shipPlacements.length; i > 0; i--) {
+      const placement = shipPlacements[i - 1];
+      if (placement[0] === currentShip.shipName) {
+        shipPlacements.splice(i - 1, 1);
+      }
+    }
+    go.setAttribute('disabled', '');
     currentlyDragging = true;
   }
   ship.addEventListener('dragstart', moveShip);
@@ -103,8 +112,7 @@ for (const square of boardSquares) {
   // Each square's class list is in the format: square x# y#
   const squareX = Number(square.classList[1].charAt(1));
   const squareY = Number(square.classList[2].charAt(1));
-  square.addEventListener('mouseleave', (e) => {
-    e.preventDefault();
+  square.addEventListener('mouseleave', () => {
     if (currentlyDragging) {
       for (let i = hoveredSquares.length; i > 0; i--) {
         const square = hoveredSquares.pop();
@@ -113,7 +121,7 @@ for (const square of boardSquares) {
       }
     }
   });
-  square.addEventListener('mouseover', (e) => {
+  square.addEventListener('mouseover', () => {
     if (currentlyDragging) {
       const currentSquares = [];
       let invalid = false;
@@ -133,6 +141,7 @@ for (const square of boardSquares) {
         }
         currentSquares.push(hoveredSquare);
       }
+      // This if statement is to prevent rechecking code we already know is invalid.  It isn't required but may make things faster.
       if (!invalid) {
         if (placedSquares.some((arr) => currentSquares.includes(arr[0]))) invalid = true;
       }
@@ -149,6 +158,7 @@ for (const square of boardSquares) {
           validPlacement = true;
         }
       }
+      // These measurments were found through manually checking what looks best with each image on each square.
       if (currentShip.orient === 'horz') {
         currentShip.bigShip.style.top =
           square.offsetTop + (currentShip.shipName === 'carrier' || currentShip.shipName === 'battle' ? 0 : 15) + 'px';
@@ -183,9 +193,8 @@ for (const square of boardSquares) {
           'px';
       }
     }
-    // Ships currently flip when the button horz/vert button is pressed even while placed.
   });
-  square.addEventListener('mouseup', (e) => {
+  square.addEventListener('mouseup', () => {
     if (currentlyDragging) {
       if (validPlacement) {
         if (currentShip.orient === 'horz') {
@@ -204,6 +213,10 @@ for (const square of boardSquares) {
           }
         }
         currentShip.disableFlip();
+        // consider changing horz/ vert instead of doing this charAt(0) thing
+        shipPlacements.push([currentShip.shipName, squareX, squareY, currentShip.orient.charAt(0)]);
+        console.log(shipPlacements);
+        if (shipPlacements.length === 5) go.removeAttribute('disabled', '');
       } else {
         currentShip.bigShip.style.top = '-5000px';
       }
@@ -224,9 +237,4 @@ document.addEventListener('mouseup', () => {
   }
 });
 
-//   Then whenever you are hovering over the board, highlight the length of the ship on the board (or height).  Possibly by giving a highlighted class
-// Or forcing a hovering.
-// If this would highlight over x/y 9, then turn the highlight into a red highlight.
-// Have a storage of already placed items.  If the highlighted items would be in the already placed items, make it glow red instead.
-// If placement valid move a ship image there.
-// Needs: Moving placed items again once placed
+export default shipPlacements;
