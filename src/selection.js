@@ -18,7 +18,7 @@ shipContainers.forEach((cont) => {
   const search = '.board-' + ship.classList[0];
   const bigShip = document.querySelector(search);
   const btn = cont.querySelector('button');
-  btn.addEventListener('click', (e) => {
+  btn.addEventListener('click', () => {
     btn.classList.toggle('horz');
     btn.classList.toggle('vert');
     if (btn.classList.contains('horz')) {
