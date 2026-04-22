@@ -2,7 +2,9 @@ import './style.css';
 import shipPlacements from './selection.js';
 import './dom.js';
 import { Player } from './classes.js';
-
+import elementCreator from './element-creator.js';
+import greyBall from './assets/grey-ball.svg';
+import greyCone from './assets/grey-cone.svg';
 // From placement, an array in the form of [[ship, x, y, h/v], [ship, x, y, h/v], [ship, x, y, h/v], [ship, x, y, h/v], [ship, x, y, h/v]].
 // If one player:
 // Take these ships, make a new player and place all 5 ships from there.  Those ships need to end up on the player board (can probably copy placement code).
@@ -26,9 +28,38 @@ const onePlayerBtn = document.querySelector('.one-player-button');
 const twoPlayerBtn = document.querySelector('.two-player-button');
 const go = document.querySelector('.go');
 const playerOne = new Player();
-let playerOneShips = [];
 const playerTwo = new Player();
-let playerTwoShips = [];
+
+// Might be able to remove these
+// Maybe turn these all into an object
+
+const enemyBoard = document.querySelector('.board.enemy');
+const enemyRedMiss = document.querySelector('.enemy .red-miss');
+
+const enemyRedHit = document.querySelector('.enemy .red-hit');
+
+const allyBoard = document.querySelector('.board.ally');
+
+const allyRedMiss = document.querySelector('.ally .red-miss');
+const allyRedHit = document.querySelector('.ally .red-hit');
+// CHANGE THESE SHIPS LATER.  THIS IS FOR TESTING
+let playerOneShips = [
+  ['carrier', 0, 9, 'v'],
+  ['battle', 0, 0, 'h'],
+  ['destroy', 1, 2, 'h'],
+  ['sub', 6, 5, 'v'],
+  ['patrol', 9, 9, 'v'],
+];
+
+let playerTwoShips = [
+  ['carrier', 0, 9, 'v'],
+  ['battle', 0, 0, 'h'],
+  ['destroy', 1, 2, 'h'],
+  ['sub', 6, 5, 'v'],
+  ['patrol', 9, 9, 'v'],
+];
+// ^^^^^ CHANGE THESE SHIPS LATER.  THIS IS FOR TESTING ^^^^^^^
+let playerOneTurn = true;
 let vsComputer = true;
 
 onePlayerBtn.addEventListener('click', () => {
@@ -49,19 +80,31 @@ go.addEventListener('click', () => {
   }
 });
 
-function regenerateBoards(playerShips) {
+function setPlayerShips() {
   for (const ship of playerOneShips) {
-    const shipSearch = `.ally .${ship[0]}`;
-    const bigShip = document.querySelector(shipSearch);
-    const squareSearch = `ally > .x${ship[1]}.y${ship[2]}`;
-    const square = document.querySelector(squareSearch);
+    playerOne.board.place(...ship);
+  }
+  for (const ship of playerTwoShips) {
+    playerTwo.board.place(...ship);
+  }
+}
+setPlayerShips();
+
+function placeShips(board, ships) {
+  for (const ship of ships) {
+    const shipSearch = `.board-${ship[0]}`;
+    const bigShip = board.querySelector(shipSearch);
+    const squareSearch = `.x${ship[1]}.y${ship[2]}`;
+    const square = board.querySelector(squareSearch);
     if (ship[3] === 'h') {
+      bigShip.classList.remove('flipped');
       bigShip.style.top = square.offsetTop + (ship[0] === 'carrier' || ship[0] === 'battle' ? 0 : 15) + 'px';
       bigShip.style.left =
         square.offsetLeft +
         (ship[0] === 'carrier' || ship[0] === 'battle' ? -2.5 : ship[0] === 'destroy' || ship[0] === 'sub' ? 15 : 5) +
         'px';
     } else {
+      bigShip.classList.add('flipped');
       bigShip.style.top =
         square.offsetTop +
         (ship[0] === 'carrier'
@@ -84,5 +127,74 @@ function regenerateBoards(playerShips) {
         'px';
     }
   }
-  //   TODO add player two ships here.
 }
+placeShips(allyBoard, playerOneShips);
+placeShips(enemyBoard, playerTwoShips);
+
+const squares = document.querySelectorAll('.enemy .square');
+for (const square of squares) {
+  square.addEventListener('click', () => {
+    const squareX = Number(square.classList[1].charAt(1));
+    const squareY = Number(square.classList[2].charAt(1));
+    const currentPlayer = playerOneTurn ? playerOne : playerTwo;
+    if (currentPlayer.allShotSquares.includes(square)) {
+      console.log('This has already been shot!!');
+      // TODO make the banner reflect this.
+    } else {
+      currentPlayer.allShotSquares.push(square);
+      const response = currentPlayer.board.recieveAttack(squareX, squareY);
+      if (response === 'Miss!') {
+        currentPlayer.missSquares.push(square);
+      } else {
+        currentPlayer.hitSquares.push(square);
+      }
+      placeMarkers(currentPlayer, square);
+    }
+
+    if (!vsComputer) playerOneTurn = !playerOneTurn;
+  });
+}
+
+function placeMarkers(player, square) {
+  if (player.lastHitSquare) {
+    const lastHitX = Number(player.lastHitSquare.classList[1].charAt(1));
+    const lastHitY = Number(player.lastHitSquare.classList[2].charAt(1));
+    if (player.board.board[lastHitX][lastHitY] === 'X') {
+      const marker = elementCreator('img', enemyBoard, ['grey-miss', 'marker', 'miss-marker'], {
+        src: greyBall,
+        alt: 'old miss marker',
+      });
+      marker.style.top = player.lastHitSquare.offsetTop + 10 + 'px';
+      marker.style.left = player.lastHitSquare.offsetLeft + 15 + 'px';
+      marker.classList.remove('hidden');
+    } else {
+      const marker = elementCreator('img', enemyBoard, ['grey-hit', 'marker', 'hit-marker'], {
+        src: greyCone,
+        alt: 'old hit marker',
+      });
+      marker.style.top = player.lastHitSquare.offsetTop + 10 + 'px';
+      marker.style.left = player.lastHitSquare.offsetLeft + 15 + 'px';
+      marker.classList.remove('hidden');
+    }
+  }
+  const squareX = Number(square.classList[1].charAt(1));
+  const squareY = Number(square.classList[2].charAt(1));
+  if (player.board.board[squareX][squareY] === 'X') {
+    enemyRedHit.classList.add('hidden');
+    player.lastHitSquare = square;
+    enemyRedMiss.style.top = square.offsetTop + 10 + 'px';
+    enemyRedMiss.style.left = square.offsetLeft + 15 + 'px';
+    enemyRedMiss.classList.remove('hidden');
+  } else {
+    enemyRedMiss.classList.add('hidden');
+    player.lastHitSquare = square;
+    enemyRedHit.style.top = square.offsetTop + 10 + 'px';
+    enemyRedHit.style.left = square.offsetLeft + 15 + 'px';
+    enemyRedHit.classList.remove('hidden');
+  }
+}
+
+// Todo:
+//   All: Ally board being generated. Reporting the miss, hits, or errors on the banner.
+//  Two player:   Have logic for completely regenerating the board with two players. Transition screen between turns two players.
+//  One Player: Computer logic.

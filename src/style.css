@@ -224,11 +224,9 @@ p {
   display: grid;
   grid-template-rows: repeat(10, 1fr);
   grid-template-columns: repeat(10, 1fr);
-}
-
-.placement-board {
   position: relative;
 }
+
 .big-ship {
   position: absolute;
   top: -50000px;
@@ -297,9 +295,27 @@ p {
   color: white;
   font-size: 3rem;
 }
-.missed {
+.square-missed {
   background-color: rgba(6, 8, 41, 0.705);
 }
-.hit {
+.square-hit {
   background-color: rgba(102, 5, 5, 0.616);
+}
+
+.marker {
+  max-height: 55px;
+  max-width: 55px;
+  position: absolute;
+  pointer-events: none;
+}
+.hit-marker {
+  left: 18px;
+  top: 10px;
+}
+.miss-marker {
+  left: 15px;
+  top: 10px;
+}
+.hidden {
+  display: none;
 }

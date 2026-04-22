@@ -34,7 +34,8 @@ class Gameboard {
   sub = new Ship(3);
   patrol = new Ship(2);
 
-  place(ship, xcoord, ycoord, orient) {
+  place(shipName, xcoord, ycoord, orient) {
+    const ship = this[`${shipName}`];
     const length = ship.length;
     const validPlacementCheck = () => {
       // this makes sure the whole ships space is unoccupied before placing the ship down.  This does unfortunately involve running over the sequence twice though.
@@ -82,7 +83,7 @@ class Gameboard {
       throw new Error('This place has already been shot before!');
     } else {
       const ship = this.board[x][y];
-      this.board[x][y] === 'O';
+      this.board[x][y] = 'O';
       ship.hit();
       if (ship.isSunk()) {
         if (--this.remainingShips <= 0) {
@@ -97,6 +98,11 @@ class Gameboard {
 // 10x10 board, carrier(5), battleship(4), destroyer(3), submarine(3), patrol boat(2)
 class Player {
   board = new Gameboard();
+  // These parts are for the UI.  This should maybe be moved elsewhere.  Have the UI make its own player object but for now I think this is the most efficent path.
+  allShotSquares = [];
+  hitSquares = [];
+  missSquares = [];
+  lastHitSquare = null;
 }
 
 export { Ship, Gameboard, Player };
