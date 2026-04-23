@@ -319,3 +319,7 @@ p {
 .hidden {
   display: none;
 }
+.enemy .big-ship,
+.ally .big-ship {
+  pointer-events: none;
+}

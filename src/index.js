@@ -30,16 +30,10 @@ const go = document.querySelector('.go');
 const playerOne = new Player();
 const playerTwo = new Player();
 
-// Might be able to remove these
-// Maybe turn these all into an object
-
 const enemyBoard = document.querySelector('.board.enemy');
 const enemyRedMiss = document.querySelector('.enemy .red-miss');
-
 const enemyRedHit = document.querySelector('.enemy .red-hit');
-
 const allyBoard = document.querySelector('.board.ally');
-
 const allyRedMiss = document.querySelector('.ally .red-miss');
 const allyRedHit = document.querySelector('.ally .red-hit');
 // CHANGE THESE SHIPS LATER.  THIS IS FOR TESTING
@@ -145,22 +139,24 @@ for (const square of squares) {
       const response = currentPlayer.board.recieveAttack(squareX, squareY);
       if (response === 'Miss!') {
         currentPlayer.missSquares.push(square);
+        square.classList.add('square-missed');
       } else {
         currentPlayer.hitSquares.push(square);
+        square.classList.add('square-hit');
       }
-      placeMarkers(currentPlayer, square);
+      placeNewMarker(currentPlayer, square);
     }
 
     if (!vsComputer) playerOneTurn = !playerOneTurn;
   });
 }
 
-function placeMarkers(player, square) {
+function placeNewMarker(player, square) {
   if (player.lastHitSquare) {
     const lastHitX = Number(player.lastHitSquare.classList[1].charAt(1));
     const lastHitY = Number(player.lastHitSquare.classList[2].charAt(1));
     if (player.board.board[lastHitX][lastHitY] === 'X') {
-      const marker = elementCreator('img', enemyBoard, ['grey-miss', 'marker', 'miss-marker'], {
+      const marker = elementCreator('img', enemyBoard, ['grey-miss', 'marker', 'miss-marker', 'old-marker'], {
         src: greyBall,
         alt: 'old miss marker',
       });
@@ -168,7 +164,7 @@ function placeMarkers(player, square) {
       marker.style.left = player.lastHitSquare.offsetLeft + 15 + 'px';
       marker.classList.remove('hidden');
     } else {
-      const marker = elementCreator('img', enemyBoard, ['grey-hit', 'marker', 'hit-marker'], {
+      const marker = elementCreator('img', enemyBoard, ['grey-hit', 'marker', 'hit-marker', 'old-marker'], {
         src: greyCone,
         alt: 'old hit marker',
       });
@@ -193,8 +189,27 @@ function placeMarkers(player, square) {
     enemyRedHit.classList.remove('hidden');
   }
 }
+function replaceAllMarkers() {
+  function clearBoard(board) {
+    const coloredSquares = board.querySelectorAll('square-missed, .square-hit');
+    for (const square of coloredSquares) {
+      square.classList.remove('square-missed');
+      square.classList.remove('square-hit');
+    }
+    const greyMarkers = board.querySelectorAll('old-marker');
+    for (const marker of greyMarkers) {
+      marker.remove();
+    }
+    const redMarkers = board.querySelectorAll('new-marker');
+    for (const marker of redMarkers) {
+      marker.style.top = '50000px';
+    }
+  }
+  clearBoard(allyBoard);
+  clearBoard(enemyBoard);
+}
 
 // Todo:
-//   All: Ally board being generated. Reporting the miss, hits, or errors on the banner.
+//   All: Ally board being generated. Reporting the miss, hits, or errors on the banner.  Turns.
 //  Two player:   Have logic for completely regenerating the board with two players. Transition screen between turns two players.
 //  One Player: Computer logic.
