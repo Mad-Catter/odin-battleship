@@ -21,8 +21,8 @@
       </div>
     </div>
     <div class="transition-screen">
-      <h2 class="transition-first-text">Player Two look away</h2>
-      <h2 class="transition-second-text">Player One prepare to place your boats</h2>
+      <h2 class="transition-first-text">This is an error</h2>
+      <h2 class="transition-second-text">You should not see this</h2>
     </div>
     <div class="placement-screen">
       <form action="">
@@ -227,10 +227,14 @@
         </div>
       </div>
     </div>
-    <div class="player-screen player1">
+    <div class="player-screen">
       <div class="board-text">
-        <h1>Your Board:</h1>
-        <h1>Enemy Board:</h1>
+        <h1>Player One's Board:</h1>
+        <div class="turn-timer">
+          <h1 class="turn-player">Player One</h1>
+          <h1 class="turn-number">Turn 1</h1>
+        </div>
+        <h1>Player Two's Board:</h1>
       </div>
       <div class="banner">
         <h1>The enemy missed! It is your turn:</h1>
@@ -297,7 +301,7 @@
         <div class="square-label">
           <p>1</p>
         </div>
-        <div class="board ally">
+        <div class="board player-one player-board">
           <img src="./assets/carrier.svg" alt="carrier" class="board-carrier big-ship" draggable="true" />
           <img src="./assets/destroy.svg" alt="destroy" class="board-destroy big-ship" draggable="true" />
           <img src="./assets/battle.svg" alt="battle" class="board-battle big-ship" draggable="true" />
@@ -412,6 +416,7 @@
           <div class="square x9 y0"></div>
         </div>
       </div>
+
       <div class="board-container">
         <div class="blank"></div>
         <div class="square-label">
@@ -474,12 +479,12 @@
         <div class="square-label">
           <p>1</p>
         </div>
-        <div class="board enemy">
-          <img src="./assets/carrier.svg" alt="carrier" class="board-carrier big-ship" draggable="true" />
-          <img src="./assets/destroy.svg" alt="destroy" class="board-destroy big-ship" draggable="true" />
-          <img src="./assets/battle.svg" alt="battle" class="board-battle big-ship" draggable="true" />
-          <img src="./assets/sub.svg" alt="sub" class="board-sub big-ship" draggable="true" />
-          <img src="./assets/patrol.svg" alt="patrol" class="board-patrol big-ship" draggable="true" />
+        <div class="board player-two player-board active-board">
+          <img src="./assets/carrier.svg" alt="carrier" class="board-carrier hidden big-ship" draggable="true" />
+          <img src="./assets/destroy.svg" alt="destroy" class="board-destroy hidden big-ship" draggable="true" />
+          <img src="./assets/battle.svg" alt="battle" class="board-battle hidden big-ship" draggable="true" />
+          <img src="./assets/sub.svg" alt="sub" class="board-sub hidden big-ship" draggable="true" />
+          <img src="./assets/patrol.svg" alt="patrol" class="board-patrol hidden big-ship" draggable="true" />
           <img src="./assets/red-cone.svg" alt="new hit marker" class="red-hit marker hidden hit-marker new-marker" />
           <img
             src="./assets/red-ball.svg"

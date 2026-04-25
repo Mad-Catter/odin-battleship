@@ -1,7 +1,8 @@
 class Ship {
   #hits = 0;
-  constructor(length) {
+  constructor(length, name) {
     this.length = length;
+    this.name = name;
   }
   hit() {
     this.#hits++;
@@ -11,6 +12,12 @@ class Ship {
       return true;
     }
     return false;
+  }
+}
+class Response {
+  constructor(status, ship) {
+    this.status = status;
+    this.ship = ship;
   }
 }
 class Gameboard {
@@ -28,11 +35,11 @@ class Gameboard {
     new Array(10),
   ];
   remainingShips = 5;
-  carrier = new Ship(5);
-  battle = new Ship(4);
-  destroy = new Ship(3);
-  sub = new Ship(3);
-  patrol = new Ship(2);
+  carrier = new Ship(5, 'carrier');
+  battle = new Ship(4, 'battleship');
+  destroy = new Ship(3, 'destroyer');
+  sub = new Ship(3, 'submarine');
+  patrol = new Ship(2, 'patrol ship');
 
   place(shipName, xcoord, ycoord, orient) {
     const ship = this[`${shipName}`];
@@ -78,7 +85,7 @@ class Gameboard {
   recieveAttack(x, y) {
     if (this.board[x][y] === undefined) {
       this.board[x][y] = 'X';
-      return 'Miss!';
+      return new Response('miss', null);
     } else if (this.board[x][y] === 'X' || this.board[x][y] === 'O') {
       throw new Error('This place has already been shot before!');
     } else {
@@ -87,11 +94,11 @@ class Gameboard {
       ship.hit();
       if (ship.isSunk()) {
         if (--this.remainingShips <= 0) {
-          return "You win!  You've sunk all their ships!";
+          return new Response('victory', ship.name);
         }
-        return 'You sunk a battleship!';
+        return new Response('sunk', ship.name);
       }
-      return 'Hit!';
+      return new Response('hit', null);
     }
   }
 }
@@ -102,7 +109,16 @@ class Player {
   allShotSquares = [];
   hitSquares = [];
   missSquares = [];
+  sunkShips = [];
   lastHitSquare = null;
+  resetPlayer() {
+    this.board = new Gameboard();
+    this.allShotSquares = [];
+    this.hitSquares = [];
+    this.missSquares = [];
+    this.sunkShips = [];
+    this.lastHitSquare = null;
+  }
 }
 
 export { Ship, Gameboard, Player };

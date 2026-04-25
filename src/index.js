@@ -26,16 +26,22 @@ import greyCone from './assets/grey-cone.svg';
 
 const onePlayerBtn = document.querySelector('.one-player-button');
 const twoPlayerBtn = document.querySelector('.two-player-button');
+const startingScreen = document.querySelector('.starting-screen');
+const placementScreen = document.querySelector('.placement-screen');
+const transitionScreen = document.querySelector('.transition-screen');
+const firstTransitionText = document.querySelector('.transition-first-text');
+const secondTransitionText = document.querySelector('.transition-second-text');
+const playerScreen = document.querySelector('.player-screen');
+const harborText = document.querySelector('.harbor>h1');
 const go = document.querySelector('.go');
-const playerOne = new Player();
-const playerTwo = new Player();
+let playerOnePlaced = false;
+let playerOneTurn = true;
 
-const enemyBoard = document.querySelector('.board.enemy');
-const enemyRedMiss = document.querySelector('.enemy .red-miss');
-const enemyRedHit = document.querySelector('.enemy .red-hit');
-const allyBoard = document.querySelector('.board.ally');
-const allyRedMiss = document.querySelector('.ally .red-miss');
-const allyRedHit = document.querySelector('.ally .red-hit');
+// CHANGE THIS AFTER TESTING
+let vsComputer = false;
+
+// THIS SHOULD MAYBE BE NULL AFTER TESTING
+let nextScreen = playerScreen;
 // CHANGE THESE SHIPS LATER.  THIS IS FOR TESTING
 let playerOneShips = [
   ['carrier', 0, 9, 'v'],
@@ -53,27 +59,82 @@ let playerTwoShips = [
   ['patrol', 9, 9, 'v'],
 ];
 // ^^^^^ CHANGE THESE SHIPS LATER.  THIS IS FOR TESTING ^^^^^^^
-let playerOneTurn = true;
-let vsComputer = true;
+
+function revealScreen(screen) {
+  screen.style.pointerEvents = 'auto';
+  screen.style.opacity = '1';
+}
+function hideScreen(screen) {
+  screen.style.pointerEvents = 'none';
+  screen.style.opacity = '0';
+}
 
 onePlayerBtn.addEventListener('click', () => {
   vsComputer = true;
+  harborText.textContent = 'Drag your ships out to sea';
+  hideScreen(startingScreen);
+  setTimeout(() => {
+    revealScreen(placementScreen);
+  }, 2000);
 });
-
 twoPlayerBtn.addEventListener('click', () => {
   vsComputer = false;
+  harborText.textContent = 'Player One: \n Drag your ships out to sea';
+  firstTransitionText.textContent = 'Player Two look away';
+  secondTransitionText.textContent = 'Player One prepare to place your boats';
+  hideScreen(startingScreen);
+  setTimeout(() => {
+    nextScreen = placementScreen;
+    revealScreen(transitionScreen);
+  }, 2000);
 });
-
+transitionScreen.addEventListener('click', () => {
+  hideScreen(transitionScreen);
+  setTimeout(() => {
+    revealScreen(nextScreen);
+  }, 500);
+});
 go.addEventListener('click', () => {
   if (vsComputer) {
-    for (const ship of shipPlacements) {
-      playerOne.board.place(...ship);
+    playerOneShips = shipPlacements;
+    hideScreen(placementScreen);
+    setTimeout(() => {
+      revealScreen([playerScreen]);
+    }, 2000);
+  } else {
+    if (!playerOnePlaced) {
+      playerOneShips = shipPlacements;
+      // CLEAR SELECTION FUNCTION HERE
+      firstTransitionText.textContent = 'Player One look away';
+      secondTransitionText.textContent = 'Player Two prepare to place your boats';
+      revealScreen(transitionScreen);
+    } else {
+      playerTwoShips = shipPlacements;
+      firstTransitionText.textContent = 'Player Two look away';
+      secondTransitionText.textContent = 'Player One it is time for battle!';
+      nextScreen = playerScreen;
+      revealScreen(transitionScreen);
     }
-    playerOneShips = [...shipPlacements];
-    console.log(playerOne.board.board);
   }
 });
+// Select player two > goes to transition screen telling p2 to look away > goes to harbor for p1 to place ships
+//  > goes back to transition screen telling p1 to look away > goes to battle screen.  In battle screen transition shows up in between turns going back to battle
+// Select player one > Goes straight to placement > then goes to battle screen.  Transition screen does not show up.
 
+const playerOne = new Player();
+const playerTwo = new Player();
+
+const turnPlayer = document.querySelector('.turn-player');
+const turnNumber = document.querySelector('.turn-number');
+
+const playerTwoBoard = document.querySelector('.board.player-two');
+const playerTwoRedMiss = document.querySelector('.player-two .red-miss');
+const playerTwoRedHit = document.querySelector('.player-two .red-hit');
+const playerOneBoard = document.querySelector('.board.player-one');
+const playerOneRedMiss = document.querySelector('.player-one .red-miss');
+const playerOneRedHit = document.querySelector('.player-one .red-hit');
+
+let turnCount = 1;
 function setPlayerShips() {
   for (const ship of playerOneShips) {
     playerOne.board.place(...ship);
@@ -122,94 +183,195 @@ function placeShips(board, ships) {
     }
   }
 }
-placeShips(allyBoard, playerOneShips);
-placeShips(enemyBoard, playerTwoShips);
+placeShips(playerOneBoard, playerOneShips);
+placeShips(playerTwoBoard, playerTwoShips);
 
-const squares = document.querySelectorAll('.enemy .square');
-for (const square of squares) {
-  square.addEventListener('click', () => {
-    const squareX = Number(square.classList[1].charAt(1));
-    const squareY = Number(square.classList[2].charAt(1));
-    const currentPlayer = playerOneTurn ? playerOne : playerTwo;
-    if (currentPlayer.allShotSquares.includes(square)) {
-      console.log('This has already been shot!!');
-      // TODO make the banner reflect this.
-    } else {
-      currentPlayer.allShotSquares.push(square);
-      const response = currentPlayer.board.recieveAttack(squareX, squareY);
-      if (response === 'Miss!') {
-        currentPlayer.missSquares.push(square);
-        square.classList.add('square-missed');
-      } else {
-        currentPlayer.hitSquares.push(square);
-        square.classList.add('square-hit');
+const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+function enableBoard(player) {
+  const search = player === playerOne ? '.player-one .square' : '.player-two .square';
+  const squares = document.querySelectorAll(search);
+  let response;
+  for (const square of squares) {
+    square.addEventListener('click', () => {
+      if ((player === playerTwo && playerOneTurn) || (player === playerOne && !playerOneTurn)) {
+        const squareX = Number(square.classList[1].charAt(1));
+        const squareY = Number(square.classList[2].charAt(1));
+        if (player.allShotSquares.includes(square)) {
+          showBanner('This spot already been shot!!');
+          return;
+        } else {
+          player.allShotSquares.push(square);
+          response = player.board.recieveAttack(squareX, squareY);
+          if (response.status === 'miss') {
+            player.missSquares.push(square);
+            square.classList.add('square-missed');
+            showBanner('A miss!!');
+          } else {
+            player.hitSquares.push(square);
+            square.classList.add('square-hit');
+            if (response.status === 'hit') {
+              showBanner('A hit!!');
+            } else if (response.status === 'victory!') {
+              const board = player === playerOne ? playerOneBoard : playerTwoBoard;
+              const allShips = board.querySelectorAll('.big-ship');
+              for (const ship of allShips) {
+                ship.classList.remove('hidden');
+              }
+              showBanner("A hit!!  You've sunk all of their battleships!");
+            } else {
+              showBanner(`A hit!! You sunk their ${response.ship}!`);
+              const search = `.board-${response.ship === 'carrier' ? 'carrier' : response.ship === 'destroyer' ? 'destroy' : response.ship === 'battleship' ? 'battle' : response.ship === 'submarine' ? 'sub' : 'patrol'}`;
+              const board = player === playerOne ? playerOneBoard : playerTwoBoard;
+              const sunkShip = board.querySelector(search);
+              sunkShip.classList.remove('hidden');
+              player.sunkShips.push(sunkShip);
+            }
+          }
+          placeNewMarker(player, square);
+        }
+
+        playerOneTurn = !playerOneTurn;
+        turnPlayer.textContent = playerOneTurn ? 'Player One' : 'Player Two';
+        if (playerOneTurn) turnNumber.textContent = `Turn ${++turnCount}`;
+        if (!vsComputer) {
+          showTransitionScreen(response, squareX, squareY);
+        }
       }
-      placeNewMarker(currentPlayer, square);
-    }
-
-    if (!vsComputer) playerOneTurn = !playerOneTurn;
-  });
+    });
+  }
 }
+enableBoard(playerOne);
+enableBoard(playerTwo);
 
+// FINISH THIS HERE
+function showTransitionScreen(response, X, Y) {
+  playerOneBoard.classList.add('no-interaction');
+  playerTwoBoard.classList.add('no-interaction');
+  firstTransitionText.textContent = `Player ${!playerOneTurn ? 'One' : 'Two'}: look away your turn has ended!`;
+  secondTransitionText.textContent = ` Player ${playerOneTurn ? 'One' : 'Two'}: The enemy attacked ${letters[X]}${Y + 1} and
+   ${
+     response.status === 'miss'
+       ? 'missed!'
+       : response.status === 'hit'
+         ? 'hit one of our ships!'
+         : response.status === 'sunk'
+           ? `sunk our ${response.ship}!`
+           : `sunk our ${response.ship} winning the game!`
+   }`;
+  setTimeout(() => {
+    revealScreen(transitionScreen);
+  }, 3000);
+}
+transitionScreen.addEventListener('transitionend', () => {
+  const playerOneBigShips = playerOneBoard.querySelectorAll('.big-ship');
+  for (const ship of playerOneBigShips) {
+    if (playerOneTurn) {
+      ship.classList.remove('hidden');
+    } else {
+      if (!playerOne.sunkShips.includes(ship)) {
+        ship.classList.add('hidden');
+      }
+    }
+  }
+  const playerTwoBigShips = playerTwoBoard.querySelectorAll('.big-ship');
+  for (const ship of playerTwoBigShips) {
+    if (!playerOneTurn) {
+      ship.classList.remove('hidden');
+    } else {
+      if (!playerTwo.sunkShips.includes(ship)) {
+        ship.classList.add('hidden');
+      }
+    }
+  }
+  playerOneBoard.classList.remove('no-interaction');
+  playerTwoBoard.classList.remove('no-interaction');
+});
 function placeNewMarker(player, square) {
+  const board = player === playerOne ? playerOneBoard : playerTwoBoard;
+  const redHit = player === playerOne ? playerOneRedHit : playerTwoRedHit;
+  const redMiss = player === playerOne ? playerOneRedMiss : playerTwoRedMiss;
   if (player.lastHitSquare) {
     const lastHitX = Number(player.lastHitSquare.classList[1].charAt(1));
     const lastHitY = Number(player.lastHitSquare.classList[2].charAt(1));
     if (player.board.board[lastHitX][lastHitY] === 'X') {
-      const marker = elementCreator('img', enemyBoard, ['grey-miss', 'marker', 'miss-marker', 'old-marker'], {
+      const marker = elementCreator('img', board, ['grey-miss', 'marker', 'miss-marker', 'old-marker'], {
         src: greyBall,
         alt: 'old miss marker',
       });
       marker.style.top = player.lastHitSquare.offsetTop + 10 + 'px';
       marker.style.left = player.lastHitSquare.offsetLeft + 15 + 'px';
-      marker.classList.remove('hidden');
     } else {
-      const marker = elementCreator('img', enemyBoard, ['grey-hit', 'marker', 'hit-marker', 'old-marker'], {
+      const marker = elementCreator('img', board, ['grey-hit', 'marker', 'hit-marker', 'old-marker'], {
         src: greyCone,
         alt: 'old hit marker',
       });
       marker.style.top = player.lastHitSquare.offsetTop + 10 + 'px';
       marker.style.left = player.lastHitSquare.offsetLeft + 15 + 'px';
-      marker.classList.remove('hidden');
     }
   }
   const squareX = Number(square.classList[1].charAt(1));
   const squareY = Number(square.classList[2].charAt(1));
   if (player.board.board[squareX][squareY] === 'X') {
-    enemyRedHit.classList.add('hidden');
-    player.lastHitSquare = square;
-    enemyRedMiss.style.top = square.offsetTop + 10 + 'px';
-    enemyRedMiss.style.left = square.offsetLeft + 15 + 'px';
-    enemyRedMiss.classList.remove('hidden');
+    redHit.classList.add('hidden');
+    redMiss.style.top = square.offsetTop + 10 + 'px';
+    redMiss.style.left = square.offsetLeft + 15 + 'px';
+    redMiss.classList.remove('hidden');
   } else {
-    enemyRedMiss.classList.add('hidden');
-    player.lastHitSquare = square;
-    enemyRedHit.style.top = square.offsetTop + 10 + 'px';
-    enemyRedHit.style.left = square.offsetLeft + 15 + 'px';
-    enemyRedHit.classList.remove('hidden');
+    redMiss.classList.add('hidden');
+    redHit.style.top = square.offsetTop + 10 + 'px';
+    redHit.style.left = square.offsetLeft + 15 + 'px';
+    redHit.classList.remove('hidden');
   }
+  player.lastHitSquare = square;
 }
-function replaceAllMarkers() {
-  function clearBoard(board) {
-    const coloredSquares = board.querySelectorAll('square-missed, .square-hit');
-    for (const square of coloredSquares) {
-      square.classList.remove('square-missed');
-      square.classList.remove('square-hit');
+let timeoutID = false;
+function showBanner(message) {
+  if (timeoutID) clearTimeout(timeoutID);
+  const banner = document.querySelector('.banner');
+  const bannerText = document.querySelector('.banner h1');
+  bannerText.textContent = message;
+  banner.style.opacity = '1';
+  timeoutID = setTimeout(() => {
+    banner.style.opacity = '0';
+  }, 3000);
+  document.addEventListener('click', (e) => {
+    if (event.target.closest('.board')) {
+      event.stopPropagation();
+    } else {
+      banner.style.opacity = '0';
     }
-    const greyMarkers = board.querySelectorAll('old-marker');
-    for (const marker of greyMarkers) {
-      marker.remove();
-    }
-    const redMarkers = board.querySelectorAll('new-marker');
-    for (const marker of redMarkers) {
-      marker.style.top = '50000px';
-    }
+  });
+}
+function resetBoard() {
+  const coloredSquares = playerScreen.querySelectorAll('square-missed, .square-hit');
+  for (const square of coloredSquares) {
+    square.classList.remove('square-missed');
+    square.classList.remove('square-hit');
   }
-  clearBoard(allyBoard);
-  clearBoard(enemyBoard);
+  const greyMarkers = playerScreen.querySelectorAll('old-marker');
+  for (const marker of greyMarkers) {
+    marker.remove();
+  }
+  const redMarkers = playerScreen.querySelectorAll('new-marker');
+  for (const marker of redMarkers) {
+    marker.style.top = '50000px';
+  }
+  const bigShips = playerScreen.querySelector('.big-ship');
+  for (const bigShip of bigShips) {
+    bigShip.classList.add('hidden');
+  }
+
+  playerOne.resetPlayer();
+  playerTwo.resetPlayer();
+  playerOneShips = [];
+  playerTwoShips = [];
+  playerOneTurn = true;
+  vsComputer = true;
+  turnCount = 1;
 }
 
 // Todo:
-//   All: Ally board being generated. Reporting the miss, hits, or errors on the banner.  Turns.
-//  Two player:   Have logic for completely regenerating the board with two players. Transition screen between turns two players.
-//  One Player: Computer logic.
+//   All:  Make dead ships show up slowly.
+//  Two player: Transition screen between turns two players.  Show hidden ships on turn switch and keep dead ships shown.  Double blind mode?
+//  One Player: Computer logic
+// Error transition can be canceled out early and ships seen before they move.
