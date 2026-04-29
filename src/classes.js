@@ -121,4 +121,10 @@ class Player {
   }
 }
 
+class Game {
+  playerOne = new Player();
+  playerTwo = new Player();
+  playerOneTurn = true;
+}
+
 export { Ship, Gameboard, Player };

@@ -1,6 +1,5 @@
 import './style.css';
 import shipPlacements from './selection.js';
-import './dom.js';
 import { Player } from './classes.js';
 import elementCreator from './element-creator.js';
 import greyBall from './assets/grey-ball.svg';
@@ -36,6 +35,7 @@ const harborText = document.querySelector('.harbor>h1');
 const go = document.querySelector('.go');
 let playerOnePlaced = false;
 let playerOneTurn = true;
+let transitionRemoveable = true;
 
 // CHANGE THIS AFTER TESTING
 let vsComputer = false;
@@ -89,10 +89,12 @@ twoPlayerBtn.addEventListener('click', () => {
   }, 2000);
 });
 transitionScreen.addEventListener('click', () => {
-  hideScreen(transitionScreen);
-  setTimeout(() => {
-    revealScreen(nextScreen);
-  }, 500);
+  if (transitionRemoveable) {
+    hideScreen(transitionScreen);
+    setTimeout(() => {
+      revealScreen(nextScreen);
+    }, 500);
+  }
 });
 go.addEventListener('click', () => {
   if (vsComputer) {
@@ -245,6 +247,8 @@ enableBoard(playerTwo);
 
 // FINISH THIS HERE
 function showTransitionScreen(response, X, Y) {
+  transitionRemoveable = false;
+  transitionScreen.classList.add('clickable');
   playerOneBoard.classList.add('no-interaction');
   playerTwoBoard.classList.add('no-interaction');
   firstTransitionText.textContent = `Player ${!playerOneTurn ? 'One' : 'Two'}: look away your turn has ended!`;
@@ -285,6 +289,8 @@ transitionScreen.addEventListener('transitionend', () => {
   }
   playerOneBoard.classList.remove('no-interaction');
   playerTwoBoard.classList.remove('no-interaction');
+  transitionRemoveable = true;
+  transitionScreen.classList.remove('clickable');
 });
 function placeNewMarker(player, square) {
   const board = player === playerOne ? playerOneBoard : playerTwoBoard;
@@ -368,10 +374,10 @@ function resetBoard() {
   playerOneTurn = true;
   vsComputer = true;
   turnCount = 1;
+  transitionRemoveable = true;
 }
 
 // Todo:
-//   All:  Make dead ships show up slowly.
-//  Two player: Transition screen between turns two players.  Show hidden ships on turn switch and keep dead ships shown.  Double blind mode?
+//   All:  Make dead ships show up slowly.  Reset game.
+//  Two player: Double blind mode?
 //  One Player: Computer logic
-// Error transition can be canceled out early and ships seen before they move.
