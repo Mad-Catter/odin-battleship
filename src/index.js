@@ -1,6 +1,6 @@
 import './style.css';
 import shipPlacements from './selection.js';
-import { Player } from './classes.js';
+import { Game } from './classes.js';
 import elementCreator from './element-creator.js';
 import greyBall from './assets/grey-ball.svg';
 import greyCone from './assets/grey-cone.svg';
@@ -34,7 +34,6 @@ const playerScreen = document.querySelector('.player-screen');
 const harborText = document.querySelector('.harbor>h1');
 const go = document.querySelector('.go');
 let playerOnePlaced = false;
-let playerOneTurn = true;
 let transitionRemoveable = true;
 
 // CHANGE THIS AFTER TESTING
@@ -101,7 +100,7 @@ go.addEventListener('click', () => {
     playerOneShips = shipPlacements;
     hideScreen(placementScreen);
     setTimeout(() => {
-      revealScreen([playerScreen]);
+      revealScreen(playerScreen);
     }, 2000);
   } else {
     if (!playerOnePlaced) {
@@ -122,27 +121,25 @@ go.addEventListener('click', () => {
 // Select player two > goes to transition screen telling p2 to look away > goes to harbor for p1 to place ships
 //  > goes back to transition screen telling p1 to look away > goes to battle screen.  In battle screen transition shows up in between turns going back to battle
 // Select player one > Goes straight to placement > then goes to battle screen.  Transition screen does not show up.
-
-const playerOne = new Player();
-const playerTwo = new Player();
+let game = new Game();
 
 const turnPlayer = document.querySelector('.turn-player');
 const turnNumber = document.querySelector('.turn-number');
 
-const playerTwoBoard = document.querySelector('.board.player-two');
-const playerTwoRedMiss = document.querySelector('.player-two .red-miss');
-const playerTwoRedHit = document.querySelector('.player-two .red-hit');
 const playerOneBoard = document.querySelector('.board.player-one');
 const playerOneRedMiss = document.querySelector('.player-one .red-miss');
 const playerOneRedHit = document.querySelector('.player-one .red-hit');
+const playerTwoBoard = document.querySelector('.board.player-two');
+const playerTwoRedMiss = document.querySelector('.player-two .red-miss');
+const playerTwoRedHit = document.querySelector('.player-two .red-hit');
 
 let turnCount = 1;
 function setPlayerShips() {
   for (const ship of playerOneShips) {
-    playerOne.board.place(...ship);
+    game.playerOne.board.place(...ship);
   }
   for (const ship of playerTwoShips) {
-    playerTwo.board.place(...ship);
+    game.playerTwo.board.place(...ship);
   }
 }
 setPlayerShips();
@@ -190,60 +187,63 @@ placeShips(playerTwoBoard, playerTwoShips);
 
 const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 function enableBoard(player) {
-  const search = player === playerOne ? '.player-one .square' : '.player-two .square';
+  const search = player === game.playerOne ? '.player-one .square' : '.player-two .square';
   const squares = document.querySelectorAll(search);
   let response;
   for (const square of squares) {
     square.addEventListener('click', () => {
-      if ((player === playerTwo && playerOneTurn) || (player === playerOne && !playerOneTurn)) {
+      if ((player === game.playerTwo && game.playerOneTurn) || (player === game.playerOne && !game.playerOneTurn)) {
         const squareX = Number(square.classList[1].charAt(1));
         const squareY = Number(square.classList[2].charAt(1));
-        if (player.allShotSquares.includes(square)) {
-          showBanner('This spot already been shot!!');
-          return;
-        } else {
-          player.allShotSquares.push(square);
-          response = player.board.recieveAttack(squareX, squareY);
-          if (response.status === 'miss') {
-            player.missSquares.push(square);
-            square.classList.add('square-missed');
-            showBanner('A miss!!');
-          } else {
-            player.hitSquares.push(square);
-            square.classList.add('square-hit');
-            if (response.status === 'hit') {
-              showBanner('A hit!!');
-            } else if (response.status === 'victory!') {
-              const board = player === playerOne ? playerOneBoard : playerTwoBoard;
-              const allShips = board.querySelectorAll('.big-ship');
-              for (const ship of allShips) {
-                ship.classList.remove('hidden');
-              }
-              showBanner("A hit!!  You've sunk all of their battleships!");
-            } else {
-              showBanner(`A hit!! You sunk their ${response.ship}!`);
-              const search = `.board-${response.ship === 'carrier' ? 'carrier' : response.ship === 'destroyer' ? 'destroy' : response.ship === 'battleship' ? 'battle' : response.ship === 'submarine' ? 'sub' : 'patrol'}`;
-              const board = player === playerOne ? playerOneBoard : playerTwoBoard;
-              const sunkShip = board.querySelector(search);
-              sunkShip.classList.remove('hidden');
-              player.sunkShips.push(sunkShip);
-            }
-          }
-          placeNewMarker(player, square);
-        }
-
-        playerOneTurn = !playerOneTurn;
-        turnPlayer.textContent = playerOneTurn ? 'Player One' : 'Player Two';
-        if (playerOneTurn) turnNumber.textContent = `Turn ${++turnCount}`;
-        if (!vsComputer) {
-          showTransitionScreen(response, squareX, squareY);
+        response = game.recieveAttack(player, squareX, squareY);
+        visualizeShot(response, player, square);
+        if (!vsComputer && response.status !== 'already shot') showTransitionScreen(response, squareX, squareY);
+        if (vsComputer && response.status !== 'already shot') {
+          setTimeout(() => {
+            const compResult = game.computerAttack();
+            const search = `.x${compResult[1][0]}.y${compResult[1][1]}`;
+            const square = playerOneBoard.querySelector(search);
+            visualizeShot(compResult[0], game.playerOne, square);
+          }, 3000);
         }
       }
     });
   }
 }
-enableBoard(playerOne);
-enableBoard(playerTwo);
+function visualizeShot(response, player, square) {
+  if (response.status === 'already shot') {
+    showBanner('This spot already been shot!!');
+  } else {
+    if (response.status === 'miss') {
+      square.classList.add('square-missed');
+      showBanner('A miss!!');
+    } else {
+      if (response.status === 'hit') {
+        square.classList.add('square-hit');
+        showBanner('A hit!!');
+      } else if (response.status === 'victory!') {
+        const board = player === game.playerOne ? playerOneBoard : playerTwoBoard;
+        const allShips = board.querySelectorAll('.big-ship');
+        for (const ship of allShips) {
+          ship.classList.remove('hidden');
+        }
+        showBanner("A hit!!  You've sunk all of their battleships!");
+      } else {
+        showBanner(`A hit!! You sunk their ${response.ship}!`);
+        const search = `.board-${response.ship === 'carrier' ? 'carrier' : response.ship === 'destroyer' ? 'destroy' : response.ship === 'battleship' ? 'battle' : response.ship === 'submarine' ? 'sub' : 'patrol'}`;
+        const board = player === game.playerOne ? playerOneBoard : playerTwoBoard;
+        const sunkShip = board.querySelector(search);
+        sunkShip.classList.remove('hidden');
+        player.sunkShips.push(sunkShip);
+      }
+    }
+    placeNewMarker(player, square);
+    turnPlayer.textContent = game.playerOneTurn ? 'Player One' : 'Player Two';
+    if (game.playerOneTurn) turnNumber.textContent = `Turn ${++turnCount}`;
+  }
+}
+enableBoard(game.playerOne);
+enableBoard(game.playerTwo);
 
 // FINISH THIS HERE
 function showTransitionScreen(response, X, Y) {
@@ -251,8 +251,8 @@ function showTransitionScreen(response, X, Y) {
   transitionScreen.classList.add('clickable');
   playerOneBoard.classList.add('no-interaction');
   playerTwoBoard.classList.add('no-interaction');
-  firstTransitionText.textContent = `Player ${!playerOneTurn ? 'One' : 'Two'}: look away your turn has ended!`;
-  secondTransitionText.textContent = ` Player ${playerOneTurn ? 'One' : 'Two'}: The enemy attacked ${letters[X]}${Y + 1} and
+  firstTransitionText.textContent = `Player ${!game.playerOneTurn ? 'One' : 'Two'}: look away your turn has ended!`;
+  secondTransitionText.textContent = ` Player ${game.playerOneTurn ? 'One' : 'Two'}: The enemy attacked ${letters[X]}${Y + 1} and
    ${
      response.status === 'miss'
        ? 'missed!'
@@ -269,20 +269,20 @@ function showTransitionScreen(response, X, Y) {
 transitionScreen.addEventListener('transitionend', () => {
   const playerOneBigShips = playerOneBoard.querySelectorAll('.big-ship');
   for (const ship of playerOneBigShips) {
-    if (playerOneTurn) {
+    if (game.playerOneTurn) {
       ship.classList.remove('hidden');
     } else {
-      if (!playerOne.sunkShips.includes(ship)) {
+      if (!game.playerOne.sunkShips.includes(ship)) {
         ship.classList.add('hidden');
       }
     }
   }
   const playerTwoBigShips = playerTwoBoard.querySelectorAll('.big-ship');
   for (const ship of playerTwoBigShips) {
-    if (!playerOneTurn) {
+    if (!game.playerOneTurn) {
       ship.classList.remove('hidden');
     } else {
-      if (!playerTwo.sunkShips.includes(ship)) {
+      if (!game.playerTwo.sunkShips.includes(ship)) {
         ship.classList.add('hidden');
       }
     }
@@ -293,9 +293,9 @@ transitionScreen.addEventListener('transitionend', () => {
   transitionScreen.classList.remove('clickable');
 });
 function placeNewMarker(player, square) {
-  const board = player === playerOne ? playerOneBoard : playerTwoBoard;
-  const redHit = player === playerOne ? playerOneRedHit : playerTwoRedHit;
-  const redMiss = player === playerOne ? playerOneRedMiss : playerTwoRedMiss;
+  const board = player === game.playerOne ? playerOneBoard : playerTwoBoard;
+  const redHit = player === game.playerOne ? playerOneRedHit : playerTwoRedHit;
+  const redMiss = player === game.playerOne ? playerOneRedMiss : playerTwoRedMiss;
   if (player.lastHitSquare) {
     const lastHitX = Number(player.lastHitSquare.classList[1].charAt(1));
     const lastHitY = Number(player.lastHitSquare.classList[2].charAt(1));
@@ -341,8 +341,8 @@ function showBanner(message) {
     banner.style.opacity = '0';
   }, 3000);
   document.addEventListener('click', (e) => {
-    if (event.target.closest('.board')) {
-      event.stopPropagation();
+    if (e.target.closest('.board')) {
+      e.stopPropagation();
     } else {
       banner.style.opacity = '0';
     }
@@ -367,11 +367,11 @@ function resetBoard() {
     bigShip.classList.add('hidden');
   }
 
-  playerOne.resetPlayer();
-  playerTwo.resetPlayer();
+  // NEW GAMEBOARD AND NEW GAMEBOARD ATTATCHMENTS GO HERE
+
   playerOneShips = [];
   playerTwoShips = [];
-  playerOneTurn = true;
+  game.playerOneTurn = true;
   vsComputer = true;
   turnCount = 1;
   transitionRemoveable = true;
@@ -380,4 +380,4 @@ function resetBoard() {
 // Todo:
 //   All:  Make dead ships show up slowly.  Reset game.
 //  Two player: Double blind mode?
-//  One Player: Computer logic
+//  One Player: Computer logic, computer ship selection

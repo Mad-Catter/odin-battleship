@@ -19,11 +19,10 @@ body {
   position: absolute;
   min-height: 100%;
   min-width: 100%;
-  /* display: flex; */
+  display: flex;
   flex-direction: column;
   align-items: center;
   transition: opacity 2s;
-  display: none;
 }
 .starting-screen h1,
 .starting-screen h2 {
@@ -82,9 +81,8 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  /* pointer-events: none;
-  opacity: 0%; */
-  display: none;
+  pointer-events: none;
+  opacity: 0%;
   transition: opacity 2s;
 }
 /* Harbor section */
@@ -267,6 +265,8 @@ p {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
+  opacity: 0;
+  pointer-events: none;
 }
 .board-text {
   width: 100vw;
