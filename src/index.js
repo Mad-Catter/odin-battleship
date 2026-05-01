@@ -378,6 +378,7 @@ function resetBoard() {
 }
 
 // Todo:
-//   All:  Make dead ships show up slowly.  Reset game.
+//   All:  Make dead ships show up slowly.  Reset game.  Allow players to have a random selection
 //  Two player: Double blind mode?
 //  One Player: Computer logic, computer ship selection
+// Comment and reexamine earlier code, especially selection

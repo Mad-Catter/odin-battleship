@@ -142,7 +142,6 @@ class Game {
     let response;
     const randomCoord = () => {
       // x first then y
-
       const coords = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
       if (!this.compShot.includes(`x${coords[0]} y${coords[1]}`)) {
         return coords;
@@ -190,6 +189,7 @@ class Game {
     } else {
       const index = Math.floor(Math.random() * this.compPrioSquares.length);
       attack = this.compPrioSquares[index];
+      this.compPrioSquares.splice(index, 1);
       response = this.playerOne.board.recieveAttack(...attack);
       if (response.status === 'sunk') {
         this.compPrioSquares.length = 0;
@@ -200,28 +200,78 @@ class Game {
           // If the hit has the same x axis as the origin shot, then the ship must be on the x axis and therefore we want to remove any spots that have a different y axis.  Vice versa if the hit has the same y
           // DEBUG LOGIC HERE
           if (attack[0] === this.compShotOrigin[0]) {
-            for (let i = 0; i++; i < this.compPrioSquares.length) {
-              if (this.compPrioSquares[i][1] === this.compShotOrigin[1]) {
-                this.compPrioSquares.splice(i, 1);
-              }
-            }
-            this.compSuspectedOrient = 'h';
-          } else {
-            for (let i = 0; i++; i < this.compPrioSquares.length) {
-              if (this.compPrioSquares[i][0] === this.compShotOrigin[0]) {
+            for (let i = this.compPrioSquares.length - 1; i > 0; i--) {
+              if (this.compPrioSquares[i][0] !== this.compShotOrigin[0]) {
                 this.compPrioSquares.splice(i, 1);
               }
             }
             this.compSuspectedOrient = 'v';
+          } else {
+            for (let i = this.compPrioSquares.length - 1; i > 0; i--) {
+              if (this.compPrioSquares[i][1] !== this.compShotOrigin[1]) {
+                this.compPrioSquares.splice(i, 1);
+              }
+            }
+            this.compSuspectedOrient = 'h';
           }
         }
         pushValidAdjacents(attack);
       }
-      this.compPrioSquares.splice(index, 1);
     }
     this.compShot.push(`x${attack[0]} y${attack[1]}`);
     this.swapTurn();
     return [response, attack];
+  }
+  generateRandomPlacements() {
+    const filledSquares = [];
+    function randomRange(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function generatePlacement(ship, length) {
+      const orient = Math.floor(Math.random() * 2) === 0 ? 'h' : 'v';
+      const potentialSquares = [];
+      let randomNumber;
+      if (orient === 'h') {
+        randomNumber = [randomRange(0, 9 - length + 1), randomRange(0, 9)];
+        for (let i = 0; i < length; i++) {
+          potentialSquares.push([randomNumber[0] + i, randomNumber[1]]);
+        }
+      } else {
+        randomNumber = [randomRange(0, 9), randomRange(length - 1, 9)];
+        for (let i = 0; i < length; i++) {
+          potentialSquares.push([randomNumber[0], randomNumber[1] - i]);
+        }
+      }
+      // This could likely be done more efficently
+      function arrayComparison() {
+        for (let i = 0; i < potentialSquares.length; i++) {
+          const firstArray = potentialSquares[i];
+          for (let j = 0; j < filledSquares.length; j++) {
+            const secondArray = filledSquares[j];
+            if (firstArray[0] === secondArray[0] && firstArray[1] === secondArray[1]) return false;
+          }
+        }
+        return true;
+      }
+      if (arrayComparison()) {
+        for (const coord of potentialSquares) {
+          filledSquares.push(coord);
+        }
+        return [ship, randomNumber[0], randomNumber[1], orient];
+      } else {
+        return generatePlacement(ship, length);
+      }
+    }
+    // Have a 50/50 chance for h or v.
+    // generate a number that is between x-length and 0 for h for x and 0 and y+length for v as coords.
+    // Have a list of tiles taken up by the current placements.  If the current placement is already taken, regenerate numbers.
+    return [
+      generatePlacement('carrier', 5),
+      generatePlacement('battle', 4),
+      generatePlacement('destroy', 3),
+      generatePlacement('sub', 3),
+      generatePlacement('patrol', 2),
+    ];
   }
 }
 
