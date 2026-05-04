@@ -21,7 +21,8 @@ class Response {
   }
 }
 class Gameboard {
-  // TODO: replacing ships.  Giving an error when trying to attack without placing all ships.
+  // The board is 10 by 10 squares.  Each row (x) is represented by the first array, and each column (y) is represented in the sub arrays.
+  // board[2][5] is x3 y6
   board = [
     new Array(10),
     new Array(10),
@@ -46,7 +47,9 @@ class Gameboard {
     const length = ship.length;
     const validPlacementCheck = () => {
       // this makes sure the whole ships space is unoccupied before placing the ship down.  This does unfortunately involve running over the sequence twice though.
-      // I could maybe change this to try to save the spots in the array somehow?
+      // The xcoord and ycoord represent the "head" of the ship with a tail going outwards from it for the rest of the length (since each ship is mulitple squares)
+      // When horizontal, the head of the ship is the left most square, and when vertical it is the top most square.
+      // So we check if adding the length to the x coordinate would mean the ship would be hanging off the board, and we subtract the length from y for the same reason.
       if (xcoord < 0 || xcoord > 9 || ycoord < 0 || ycoord > 9) {
         throw new Error('Ship would be out of bounds!');
       }
@@ -102,7 +105,6 @@ class Gameboard {
     }
   }
 }
-// 10x10 board, carrier(5), battleship(4), destroyer(3), submarine(3), patrol boat(2)
 class Player {
   board = new Gameboard();
   // These parts are for the UI.  This should maybe be moved elsewhere.  Have the UI make its own player object but for now I think this is the most efficent path.
@@ -140,6 +142,7 @@ class Game {
     //   If the ship gets sunk, the prioity list should be cleared (should something be done about adjacent ships next to eachother?)
     let attack;
     let response;
+    // We roll a random set of coords to attack, if we already attacked them reroll.
     const randomCoord = () => {
       // x first then y
       const coords = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
@@ -150,6 +153,9 @@ class Game {
       }
     };
     const pushValidAdjacents = (attack) => {
+      // If the computer hits an enemy ship, it adds the four adjacent squares to a list of priority squares to attack.
+      //  (assuming they are both on the board and not alrready attacked)
+      // If we know the orientation of the ship, we only need to add squares on the x or y axis instead of all 4 squares.
       if (!this.compSuspectedOrient) {
         if (!(attack[0] - 1 < 0) && !this.compShot.includes(`x${attack[0] - 1} y${attack[1]}`)) {
           this.compPrioSquares.push([attack[0] - 1, attack[1]]);
@@ -179,6 +185,7 @@ class Game {
         }
       }
     };
+    // If there are no high prio squares, choose randomly but if there are...
     if (this.compPrioSquares.length === 0) {
       attack = randomCoord();
       response = this.playerOne.board.recieveAttack(...attack);
@@ -187,27 +194,29 @@ class Game {
         this.compShotOrigin = attack;
       }
     } else {
+      // The computer picks a random square from the priority squares and attacks it
       const index = Math.floor(Math.random() * this.compPrioSquares.length);
       attack = this.compPrioSquares[index];
       this.compPrioSquares.splice(index, 1);
       response = this.playerOne.board.recieveAttack(...attack);
+      // If the computer sinks a ship, clear out the priority squares since the ship it was hunting is gone.
       if (response.status === 'sunk') {
         this.compPrioSquares.length = 0;
         this.compShotOrigin = null;
         this.compSuspectedOrient = null;
       } else if (response.status === 'hit') {
         if (!this.compSuspectedOrient) {
-          // If the hit has the same x axis as the origin shot, then the ship must be on the x axis and therefore we want to remove any spots that have a different y axis.  Vice versa if the hit has the same y
-          // DEBUG LOGIC HERE
+          // If the hit has the same x axis as the origin shot, then the ship must be on the x axis and therefore we want to remove any spots that have a different x axis.
+          // Vice versa if the hit has the same y
           if (attack[0] === this.compShotOrigin[0]) {
-            for (let i = this.compPrioSquares.length - 1; i > 0; i--) {
+            for (let i = this.compPrioSquares.length - 1; i >= 0; i--) {
               if (this.compPrioSquares[i][0] !== this.compShotOrigin[0]) {
                 this.compPrioSquares.splice(i, 1);
               }
             }
             this.compSuspectedOrient = 'v';
           } else {
-            for (let i = this.compPrioSquares.length - 1; i > 0; i--) {
+            for (let i = this.compPrioSquares.length - 1; i >= 0; i--) {
               if (this.compPrioSquares[i][1] !== this.compShotOrigin[1]) {
                 this.compPrioSquares.splice(i, 1);
               }
@@ -222,57 +231,55 @@ class Game {
     this.swapTurn();
     return [response, attack];
   }
-  generateRandomPlacements() {
-    const filledSquares = [];
-    function randomRange(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    function generatePlacement(ship, length) {
-      const orient = Math.floor(Math.random() * 2) === 0 ? 'h' : 'v';
-      const potentialSquares = [];
-      let randomNumber;
-      if (orient === 'h') {
-        randomNumber = [randomRange(0, 9 - length + 1), randomRange(0, 9)];
-        for (let i = 0; i < length; i++) {
-          potentialSquares.push([randomNumber[0] + i, randomNumber[1]]);
-        }
-      } else {
-        randomNumber = [randomRange(0, 9), randomRange(length - 1, 9)];
-        for (let i = 0; i < length; i++) {
-          potentialSquares.push([randomNumber[0], randomNumber[1] - i]);
-        }
-      }
-      // This could likely be done more efficently
-      function arrayComparison() {
-        for (let i = 0; i < potentialSquares.length; i++) {
-          const firstArray = potentialSquares[i];
-          for (let j = 0; j < filledSquares.length; j++) {
-            const secondArray = filledSquares[j];
-            if (firstArray[0] === secondArray[0] && firstArray[1] === secondArray[1]) return false;
-          }
-        }
-        return true;
-      }
-      if (arrayComparison()) {
-        for (const coord of potentialSquares) {
-          filledSquares.push(coord);
-        }
-        return [ship, randomNumber[0], randomNumber[1], orient];
-      } else {
-        return generatePlacement(ship, length);
-      }
-    }
-    // Have a 50/50 chance for h or v.
-    // generate a number that is between x-length and 0 for h for x and 0 and y+length for v as coords.
-    // Have a list of tiles taken up by the current placements.  If the current placement is already taken, regenerate numbers.
-    return [
-      generatePlacement('carrier', 5),
-      generatePlacement('battle', 4),
-      generatePlacement('destroy', 3),
-      generatePlacement('sub', 3),
-      generatePlacement('patrol', 2),
-    ];
-  }
 }
+function generateRandomPlacements() {
+  const filledSquares = [];
+  function randomRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function generatePlacement(ship, length) {
+    const orient = Math.floor(Math.random() * 2) === 0 ? 'h' : 'v';
+    const potentialSquares = [];
+    let randomNumber;
+    if (orient === 'h') {
+      randomNumber = [randomRange(0, 9 - length + 1), randomRange(0, 9)];
+      for (let i = 0; i < length; i++) {
+        potentialSquares.push([randomNumber[0] + i, randomNumber[1]]);
+      }
+    } else {
+      randomNumber = [randomRange(0, 9), randomRange(length - 1, 9)];
+      for (let i = 0; i < length; i++) {
+        potentialSquares.push([randomNumber[0], randomNumber[1] - i]);
+      }
+    }
 
-export { Ship, Gameboard, Player, Game };
+    // This could likely be done more efficently
+    function arrayComparison() {
+      for (let i = 0; i < potentialSquares.length; i++) {
+        const firstArray = potentialSquares[i];
+        for (let j = 0; j < filledSquares.length; j++) {
+          const secondArray = filledSquares[j];
+          if (firstArray[0] === secondArray[0] && firstArray[1] === secondArray[1]) return false;
+        }
+      }
+      return true;
+    }
+    // This checks if any of the potential square picked out for the ship are already taken.  If they are reroll the random placement.
+    if (arrayComparison()) {
+      for (const coord of potentialSquares) {
+        filledSquares.push(coord);
+      }
+      return [ship, randomNumber[0], randomNumber[1], orient];
+    } else {
+      return generatePlacement(ship, length);
+    }
+  }
+  return [
+    generatePlacement('carrier', 5),
+    generatePlacement('battle', 4),
+    generatePlacement('destroy', 3),
+    generatePlacement('sub', 3),
+    generatePlacement('patrol', 2),
+  ];
+}
+export { Ship, Gameboard, Player, Game, generateRandomPlacements };
